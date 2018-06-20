@@ -32,38 +32,46 @@ class CreateCheckTestCase(BaseTestCase):
         self.assertEqual(r.status_code, 201)
 
         doc = r.json()
-        assert "ping_url" in doc
-        self.assertEqual(doc["name"], "Foo")
-        self.assertEqual(doc["tags"], "bar,baz")
+        self.assertIn("ping_url", doc)
+        self.assertEqual("Foo", doc["name"])
+        self.assertEqual("bar,baz", doc["tags"])
 
         ### Assert the expected last_ping and n_pings values
+        self.assertEqual(0, doc['n_pings'])
+        self.assertEqual(None, doc['last_ping'])
 
         self.assertEqual(Check.objects.count(), 1)
         check = Check.objects.get()
-        self.assertEqual(check.name, "Foo")
-        self.assertEqual(check.tags, "bar,baz")
-        self.assertEqual(check.timeout.total_seconds(), 3600)
-        self.assertEqual(check.grace.total_seconds(), 60)
+        self.assertEqual("Foo", check.name)
+        self.assertEqual("bar,baz", check.tags)
+        self.assertEqual(3600, check.timeout.total_seconds())
+        self.assertEqual(60, check.grace.total_seconds())
 
     def test_it_accepts_api_key_in_header(self):
         payload = json.dumps({"name": "Foo"})
 
         ### Make the post request and get the response
-        r = {'status_code': 201} ### This is just a placeholder variable
-
-        self.assertEqual(r['status_code'], 201)
+        r = self.client.post(self.URL, payload, content_type="application/json", HTTP_X_API_KEY="abc")
+        self.assertEqual(201, r.status_code)
 
     def test_it_handles_missing_request_body(self):
         ### Make the post request with a missing body and get the response
-        r = {'status_code': 400, 'error': "wrong api_key"} ### This is just a placeholder variable
-        self.assertEqual(r['status_code'], 400)
-        self.assertEqual(r["error"], "wrong api_key")
+        expected_result = {'status_code': 400, 'error': "wrong api_key"} ### This is just a placeholder variable
+        r = self.client.post(self.URL, content_type="application/json")
+        r_to_json = r.json()
+
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("wrong api_key", r_to_json["error"])
 
     def test_it_handles_invalid_json(self):
         ### Make the post request with invalid json data type
-        r = {'status_code': 400, 'error': "could not parse request body"} ### This is just a placeholder variable
-        self.assertEqual(r['status_code'], 400)
-        self.assertEqual(r["error"], "could not parse request body")
+        payload = "a string is not json "
+        expected_result = {'status_code': 400, 'error': "could not parse request body"} ### This is just a placeholder variable
+        r = self.client.post(self.URL, payload, content_type="application/json")
+        r_to_json = r.json()
+
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("could not parse request body", r_to_json["error"])
 
     def test_it_rejects_wrong_api_key(self):
         self.post({"api_key": "wrong"},
@@ -78,4 +86,33 @@ class CreateCheckTestCase(BaseTestCase):
                   expected_error="name is not a string")
 
     ### Test for the assignment of channels
+    def test_it_assigns_channels(self):
+        r = self.post({
+            "api_key": "abc",
+            "channel": "*"
+        })
+
+        self.assertEqual(201, r.status_code)
+
     ### Test for the 'timeout is too small' and 'timeout is too large' errors
+    def test_its_timeout_too_large(self):
+        r = self.post({
+            "api_key": "abc",
+            "name": "Foo",
+            "tags": "bar,baz",
+            "timeout": 874500,
+            "grace": 60
+        })
+
+        self.assertEqual(400, r.status_code)
+
+    def test_its_timeout_too_small(self):
+        r = self.post({
+            "api_key": "abc",
+            "name": "Foo",
+            "tags": "bar,baz",
+            "timeout": 58,
+            "grace": 60
+        })
+
+        self.assertEqual(400, r.status_code)

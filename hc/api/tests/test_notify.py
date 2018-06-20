@@ -223,3 +223,19 @@ class NotifyTestCase(BaseTestCase):
         self.assertEqual(json["message_type"], "CRITICAL")
 
     ### Test that the web hooks handle connection errors and error 500s
+    @patch("hc.api.transports.requests.request", side_effect=ConnectionError)
+    def test_web_hooks_handle_connection_errors(self, mock_get):
+        self._setup_data("webhook", "http://www.google.com")
+        self.channel.notify(self.check)
+
+        notification = Notification.objects.get()
+        self.assertEqual(notification.error, "Connection failed")
+
+    @patch("hc.api.transports.requests.request")
+    def test_web_hoohs_handles_500_error(self, mock_get):
+        self._setup_data("webhook", "http://www.google.com")
+        mock_get.return_value.status_code = 500
+        self.channel.notify(self.check)
+
+        notification = Notification.objects.get()
+        self.assertEqual("Received status code 500", notification.error)

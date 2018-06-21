@@ -6,12 +6,11 @@ install:
     - pip install -r requirements.txt
     - pip install braintree coveralls mock mysqlclient
 env:
-  - DB=sqlite
-  - DB=mysql
   - DB=postgres
 addons:
   postgresql: "9.4"
 script:
+  - ./manage.py compress
   - coverage run --omit=*/tests/* --source=hc manage.py test
 after_success: coveralls
 cache: pip

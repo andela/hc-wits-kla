@@ -12,13 +12,15 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 import os
 import warnings
+from decouple import config
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 HOST = "localhost"
-SECRET_KEY = "---"
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY = os.environ.get('SECRET_KEY', 'secret')
+DEBUG = os.environ.get('DEBUG', False)
+ALLOWED_HOSTS = ['*']
 DEFAULT_FROM_EMAIL = 'healthchecks@example.org'
 USE_PAYMENTS = False
 
@@ -98,6 +100,13 @@ if os.environ.get("DB") == "postgres":
             'USER':     'postgres',
             'TEST': {'CHARSET': 'UTF8'}
         }
+    }
+
+
+# create database configurations for heroku
+if os.environ.get("DB") == "heroku_db":
+    DATABASES = {
+        'default': dj_database_url.config(default=config('DATABASE_URL'))
     }
 
 if os.environ.get("DB") == "mysql":

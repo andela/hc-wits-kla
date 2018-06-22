@@ -10,7 +10,7 @@
 
 healthchecks is a watchdog for your cron jobs. It's a web server that listens for pings from your cron jobs, plus a web interface.
 
-It is live here: [http://healthchecks.io/](http://healthchecks.io/)
+It is live here: [https://health-checks-wits.herokuapp.com/]
 
 The building blocks are:
 
@@ -36,7 +36,7 @@ in development environment.
 
 * check out project code:
 
-        $ git clone https://github.com/healthchecks/healthchecks.git
+        $ git clone https://github.com/andela/hc-wits-kla.git
 
 * install requirements (Django, ...) into virtualenv:
 

@@ -1,7 +1,8 @@
 from django.core import mail
-
+from django.core.urlresolvers import reverse
+from django.contrib.messages import get_messages
 from hc.test import BaseTestCase
-from hc.accounts.models import Member
+from hc.accounts.models import Member, Profile
 from hc.api.models import Check
 
 
@@ -17,9 +18,19 @@ class ProfileTestCase(BaseTestCase):
         # profile.token should be set now
         self.alice.profile.refresh_from_db()
         token = self.alice.profile.token
-        ### Assert that the token is set
+        # Assert that the token is set
+        self.assertIsNotNone(token)
 
-        ### Assert that the email was sent and check email content
+        # Assert that the email was sent and check email content
+
+        # Assert that there is one mail in the outbox
+        self.assertEqual(len(mail.outbox), 1)
+
+        # check the email content, assert subject and body
+        self.assertEqual(mail.outbox[0].subject,
+                         "Set password on healthchecks.io")
+        self.assertIn("Here's a link to set a password for your account",
+                      mail.outbox[0].body)
 
     def test_it_sends_report(self):
         check = Check(name="Test Check", user=self.alice)
@@ -27,7 +38,12 @@ class ProfileTestCase(BaseTestCase):
 
         self.alice.profile.send_report()
 
-        ###Assert that the email was sent and check email content
+        # Assert that the email was sent and check email content
+        self.assertEqual(len(mail.outbox), 1)
+
+        # check the subject and body of mail and assert that its monthly report
+        self.assertEqual(mail.outbox[0].subject, 'Monthly Report')
+        self.assertIn("Test Check", mail.outbox[0].body)
 
     def test_it_adds_team_member(self):
         self.client.login(username="alice@example.org", password="password")
@@ -40,11 +56,17 @@ class ProfileTestCase(BaseTestCase):
         for member in self.alice.profile.member_set.all():
             member_emails.add(member.user.email)
 
-        ### Assert the existence of the member emails
+        # Assert the existence of the member emails
+        self.assertNotEqual(member_emails, 0)
 
         self.assertTrue("frank@example.org" in member_emails)
 
-        ###Assert that the email was sent and check email content
+        # Assert that the email was sent and check email content
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            mail.outbox[0].subject, "You have been invited to join alice@example.org on healthchecks.io")
+        self.assertTrue(
+            "You will be able to manage their existing monitoring" in mail.outbox[0].body)
 
     def test_add_team_member_checks_team_access_allowed_flag(self):
         self.client.login(username="charlie@example.org", password="password")
@@ -107,4 +129,27 @@ class ProfileTestCase(BaseTestCase):
         # Expect only Alice's tags
         self.assertNotContains(r, "bobs-tag.svg")
 
-    ### Test it creates and revokes API key
+    # Test it creates and revokes API key
+
+    def test_it_creates_api_key(self):
+        self.client.login(username="alice@example.org", password="password")
+
+        # set the api_key
+        req = self.client.post(reverse("hc-profile"), {"create_api_key": True})
+        self.assertEqual(req.status_code, 200)
+
+        # api_key is set should be set
+        self.alice.profile.refresh_from_db()
+
+        # check that api_key is not equal to empty
+        self.assertNotEqual(self.alice.profile.api_key, "")
+
+    def test_it_revokes_api_key(self):
+        self.client.login(username="alice@example.org", password="password")
+        # revoke the api_key
+        req = self.client.post(reverse("hc-profile"), {"revoke_api_key": True})
+        self.assertEqual(req.status_code, 200)
+
+        # api_key should be revoked and  api_key should be empty
+        self.alice.profile.refresh_from_db()
+        self.assertEqual(self.alice.profile.api_key, "")

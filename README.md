@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/andela/hc-wits-kla.svg?branch=develop)](https://travis-ci.org/andela/hc-wits-kla)
+[![Coverage Status](https://coveralls.io/repos/github/andela/hc-wits-kla/badge.svg?branch=develop)](https://coveralls.io/github/andela/hc-wits-kla?branch=develop)
 # healthchecks
 
 ![Screenshot of Welcome page](/stuff/screenshots/welcome.png?raw=true "Welcome Page")

@@ -18,8 +18,8 @@ class UpdateTimeoutTestCase(BaseTestCase):
         self.assertRedirects(r, "/checks/")
 
         check = Check.objects.get(code=self.check.code)
-        assert check.timeout.total_seconds() == 3600
-        assert check.grace.total_seconds() == 60
+        self.assertEqual(3600, check.timeout.total_seconds())
+        self.assertEqual(60, check.grace.total_seconds())
 
     def test_team_access_works(self):
         url = "/checks/%s/timeout/" % self.check.code
@@ -31,7 +31,7 @@ class UpdateTimeoutTestCase(BaseTestCase):
         self.client.post(url, data=payload)
 
         check = Check.objects.get(code=self.check.code)
-        assert check.timeout.total_seconds() == 7200
+        self.assertEqual(7200, check.timeout.total_seconds())
 
     def test_it_handles_bad_uuid(self):
         url = "/checks/not-uuid/timeout/"
@@ -39,7 +39,7 @@ class UpdateTimeoutTestCase(BaseTestCase):
 
         self.client.login(username="alice@example.org", password="password")
         r = self.client.post(url, data=payload)
-        assert r.status_code == 400
+        self.assertEqual(400, r.status_code)
 
     def test_it_handles_missing_uuid(self):
         # Valid UUID but there is no check for it:
@@ -48,7 +48,7 @@ class UpdateTimeoutTestCase(BaseTestCase):
 
         self.client.login(username="alice@example.org", password="password")
         r = self.client.post(url, data=payload)
-        assert r.status_code == 404
+        self.assertEqual(404, r.status_code)
 
     def test_it_checks_ownership(self):
         url = "/checks/%s/timeout/" % self.check.code
@@ -56,4 +56,5 @@ class UpdateTimeoutTestCase(BaseTestCase):
 
         self.client.login(username="charlie@example.org", password="password")
         r = self.client.post(url, data=payload)
-        assert r.status_code == 403
+        self.assertEqual(403, r.status_code)
+

@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from django.core.urlresolvers import reverse
 from hc.test import BaseTestCase
 
 
@@ -21,8 +22,20 @@ class CheckTokenTestCase(BaseTestCase):
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.token, "")
 
-    ### Login and test it redirects already logged in
+    # Login and test it redirects already logged in
+    def test_logged_in_user_is_redirected(self):
+        # login user for the first time
+        self.client.login(username="alice@example.org", password="password")
 
-    ### Login with a bad token and check that it redirects
+        # login user again
+        r = self.client.post("/accounts/check_token/alice/secret-token/")
 
-    ### Any other tests?
+        # assert that it redirects to hc-checks when already logged in
+        self.assertRedirects(r, reverse("hc-checks"))
+
+    # Login with a bad token and check that it redirects
+    def test_login_with_bad_token_redirects(self):
+        r = self.client.post("/accounts/check_token/alice/bad-token/")
+        self.assertRedirects(r, reverse("hc-login"))
+
+    # Any other tests?

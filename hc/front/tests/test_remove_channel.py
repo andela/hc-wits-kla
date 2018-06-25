@@ -17,28 +17,28 @@ class RemoveChannelTestCase(BaseTestCase):
         r = self.client.post(url)
         self.assertRedirects(r, "/integrations/")
 
-        assert Channel.objects.count() == 0
+        self.assertEqual(0, Channel.objects.count())
 
     def test_team_access_works(self):
         url = "/integrations/%s/remove/" % self.channel.code
 
         self.client.login(username="bob@example.org", password="password")
         self.client.post(url)
-        assert Channel.objects.count() == 0
+        self.assertEqual(0, Channel.objects.count())
 
     def test_it_handles_bad_uuid(self):
         url = "/integrations/not-uuid/remove/"
 
         self.client.login(username="alice@example.org", password="password")
         r = self.client.post(url)
-        assert r.status_code == 400
+        self.assertEqual(400, r.status_code)
 
     def test_it_checks_owner(self):
         url = "/integrations/%s/remove/" % self.channel.code
 
         self.client.login(username="charlie@example.org", password="password")
         r = self.client.post(url)
-        assert r.status_code == 403
+        self.assertEqual(403, r.status_code)
 
     def test_it_handles_missing_uuid(self):
         # Valid UUID but there is no channel for it:
@@ -46,4 +46,4 @@ class RemoveChannelTestCase(BaseTestCase):
 
         self.client.login(username="alice@example.org", password="password")
         r = self.client.post(url)
-        assert r.status_code == 302
+        self.assertEqual(302, r.status_code)

@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 .coverage
 .vscode/
+.idea
+.pytest_cache
 hc.sqlite
 hc/local_settings.py
 static-collected

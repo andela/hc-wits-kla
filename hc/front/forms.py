@@ -18,8 +18,12 @@ class NameTagsForm(forms.Form):
 
 
 class TimeoutForm(forms.Form):
-    timeout = forms.IntegerField(min_value=60, max_value=2592000)
-    grace = forms.IntegerField(min_value=60, max_value=2592000)
+    """
+    Sets the timeout and grace periods of a check with minimum value of 1 minute (60 seconds) and maximum value of 1
+    year (31536000 seconds).
+    """
+    timeout = forms.IntegerField(min_value=60, max_value=31536000)
+    grace = forms.IntegerField(min_value=60, max_value=31536000)
 
 
 class AddChannelForm(forms.ModelForm):

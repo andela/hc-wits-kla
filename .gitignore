@@ -12,3 +12,4 @@ static-collected
 static/.DS_Store
 hc-venv
 .env
+htmlcov

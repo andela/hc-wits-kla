@@ -59,6 +59,38 @@ def my_checks(request):
 
     return render(request, "front/my_checks.html", ctx)
 
+@login_required
+def failed_checks(request):
+    ''' render the failed jobs tab with the jobs that went down '''
+    q = Check.objects.filter(user=request.team.user).order_by("created")
+    checks = list(q)
+    unresolved_checks = []
+
+    counter = Counter()
+    down_tags, grace_tags = set(), set()
+    for check in checks:
+        status = check.get_status()
+        if status == "down":
+            unresolved_checks.append(check)
+            for tag in check.tags_list():
+                if tag == "":
+                    continue
+
+                counter[tag] += 1
+                down_tags.add(tag)
+
+    ctx = {
+        "page": "unresolved",
+        "checks": unresolved_checks,
+        "now": timezone.now(),
+        "tags": counter.most_common(),
+        "down_tags": down_tags,
+        "grace_tags": grace_tags,
+        "ping_endpoint": settings.PING_ENDPOINT
+    }
+
+    return render(request, "front/failed_checks.html", ctx)
+
 
 def _welcome_check(request):
     check = None

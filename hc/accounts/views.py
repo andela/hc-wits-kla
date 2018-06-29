@@ -14,7 +14,7 @@ from django.shortcuts import redirect, render
 from hc.accounts.forms import (EmailPasswordForm, InviteTeamMemberForm,
                                RemoveTeamMemberForm, ReportSettingsForm,
                                SetPasswordForm, TeamNameForm)
-from hc.accounts.models import Profile, Member
+from hc.accounts.models import Profile, Member, REPORT_PERIOD_CHOICES
 from hc.api.models import Channel, Check
 from hc.lib.badges import get_badge_url
 
@@ -157,6 +157,8 @@ def profile(request):
             form = ReportSettingsForm(request.POST)
             if form.is_valid():
                 profile.reports_allowed = form.cleaned_data["reports_allowed"]
+                profile.reports_period = form.cleaned_data.get(
+                    "reports_period", 'Monthly')
                 profile.save()
                 messages.success(request, "Your settings have been updated!")
         elif "invite_team_member" in request.POST:
@@ -213,7 +215,8 @@ def profile(request):
         "page": "profile",
         "badge_urls": badge_urls,
         "profile": profile,
-        "show_api_key": show_api_key
+        "show_api_key": show_api_key,
+        "report_periods": REPORT_PERIOD_CHOICES
     }
 
     return render(request, "accounts/profile.html", ctx)

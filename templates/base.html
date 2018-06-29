@@ -94,6 +94,12 @@
                 </li>
                 {% endif %}
 
+                {% if request.user.is_authenticated and request.user.profile.reports_allowed %}
+                 <li>
+                    <a href="{% url 'hc-reports' %}"> Reports</a>
+                 </li>
+                {% endif %}
+
                 <li {% if page == 'docs' %} class="active" {% endif %}>
                     <a href="{% url 'hc-docs' %}">Docs</a>
                 </li>

@@ -42,7 +42,7 @@ class ProfileTestCase(BaseTestCase):
         self.assertEqual(len(mail.outbox), 1)
 
         # check the subject and body of mail and assert that its monthly report
-        self.assertEqual(mail.outbox[0].subject, 'Monthly Report')
+        self.assertEqual(mail.outbox[0].subject, 'Report')
         self.assertIn("Test Check", mail.outbox[0].body)
 
     def test_it_adds_team_member(self):
@@ -153,3 +153,16 @@ class ProfileTestCase(BaseTestCase):
         # api_key should be revoked and  api_key should be empty
         self.alice.profile.refresh_from_db()
         self.assertEqual(self.alice.profile.api_key, "")
+
+    def test_it_updates_report_period(self):
+        self.client.login(username="alice@example.org", password="password")
+        req = self.client.post(
+            reverse("hc-profile"), {
+                "update_reports_allowed": True,
+                "reports_allowed": True,
+                "reports_period": "Daily"
+            })
+        self.assertEqual(req.status_code, 200)
+
+        self.alice.profile.refresh_from_db()
+        self.assertEqual(self.alice.profile.reports_period, "Daily")

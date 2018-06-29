@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load compress staticfiles %}
+{% load hc_extras humanize %}
+{% block title %}My Reports - healthchecks.io{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+        <h1>
+        {% if request.team == request.user.profile %}
+            My {{request.user.profile.reports_period }} Report
+        {% else %}
+            {{ request.team.team_name }} {{request.user.profile.reports_period }} Report
+        {% endif %}
+        </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+    {% if checks %}
+    <table class="table channels-table">
+        <tbody>
+            <tr>
+                <th>Status</th>
+                <th class="th-name">Name</th>
+                <th>Last Ping</th>
+            </tr>
+          {% for check in checks %}
+                <tr class="channel-row">
+                    <td>
+                        {% if check.get_status == "new" %}
+                            <span class="label label-default">NEW</span>
+                        {% elif check.get_status == "paused" %}
+                            <span class="label label-default">PAUSED</span>
+                        {% elif check.in_grace_period %}
+                            <span class="label label-warning">LATE</span>
+                        {% elif check.get_status == "up" %}
+                            <span class="label label-success">UP</span>
+                        {% elif check.get_status == "down" %}
+                            <span class="label label-danger">DOWN</span>
+                        {% endif %}
+                    </td>
+                    <td class="name-cell">
+                        {{ check.name }}
+                    </td>
+                    <td class="timeout-cell">
+                        {% if check.last_ping %}
+                            {{ check.last_ping|naturaltime }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    {% else %}
+    <div class="alert alert-info">You don't have checks due for reporting.</div>
+    {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% compress js %}
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>`
+{% endcompress %}
+{% endblock %}

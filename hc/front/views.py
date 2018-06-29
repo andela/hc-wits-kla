@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.six.moves.urllib.parse import urlencode
 from hc.api.decorators import uuid_or_400
+from hc.accounts.models import REPORT_PERIOD_CHOICES
 from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping
 from hc.front.forms import (AddChannelForm, AddWebhookForm, NameTagsForm,
                             TimeoutForm)
@@ -25,6 +26,27 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
+
+
+@login_required
+def my_reports(request):
+    reports_period = request.team.user.profile.reports_period
+
+    # pick checks whose last ping falls within the reporting period.
+    now = timezone.now()
+    try:
+        start_date = now - td(days=REPORT_PERIOD_CHOICES[reports_period])
+    except KeyError:
+        start_date = td(days=REPORT_PERIOD_CHOICES['Monthly'])
+    checks = request.team.user.check_set.filter(
+        last_ping__range=(start_date, now)
+    )
+    ctx = {
+        'start_date': start_date,
+        'end_date': now,
+        'checks': checks
+    }
+    return render(request, 'front/my_reports.html', ctx)
 
 
 @login_required
@@ -308,7 +330,8 @@ def channels(request):
         channel.checks = new_checks
         return redirect("hc-channels")
 
-    channels = Channel.objects.filter(user=request.team.user).order_by("created")
+    channels = Channel.objects.filter(
+        user=request.team.user).order_by("created")
     channels = channels.annotate(n_checks=Count("checks"))
 
     num_checks = Check.objects.filter(user=request.team.user).count()

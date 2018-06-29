@@ -12,6 +12,12 @@ from django.urls import reverse
 from django.utils import timezone
 from hc.lib import emails
 
+REPORT_PERIOD_CHOICES = {
+    'Daily': 1,
+    'Weekly': 7,
+    'Monthly': 30
+}
+
 
 class Profile(models.Model):
     # Owner:
@@ -20,6 +26,7 @@ class Profile(models.Model):
     team_access_allowed = models.BooleanField(default=False)
     next_report_date = models.DateTimeField(null=True, blank=True)
     reports_allowed = models.BooleanField(default=True)
+    reports_period = models.CharField(max_length=10, default="Monthly")
     ping_log_limit = models.IntegerField(default=100)
     token = models.CharField(max_length=128, blank=True)
     api_key = models.CharField(max_length=128, blank=True)
@@ -56,8 +63,12 @@ class Profile(models.Model):
     def send_report(self):
         # reset next report date first:
         now = timezone.now()
-        self.next_report_date = now + timedelta(days=30)
-        self.save()
+        try:
+            self.next_report_date = now + \
+                timedelta(days=REPORT_PERIOD_CHOICES[self.reports_period])
+            self.save()
+        except KeyError:
+            return
 
         token = signing.Signer().sign(uuid.uuid4())
         path = reverse("hc-unsubscribe-reports", args=[self.user.username])
@@ -66,6 +77,7 @@ class Profile(models.Model):
         ctx = {
             "checks": self.user.check_set.order_by("created"),
             "now": now,
+            "period": self.reports_period.lower(),
             "unsub_link": unsub_link
         }
 

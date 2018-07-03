@@ -26,6 +26,9 @@ def ping(request, code):
     if check.status in ("new", "paused"):
         check.status = "up"
 
+    if check.nag_mode == "on":
+        check.nag_mode = "off"
+
     check.save()
     check.refresh_from_db()
 
@@ -62,6 +65,8 @@ def checks(request):
             check.timeout = td(seconds=request.json["timeout"])
         if "grace" in request.json:
             check.grace = td(seconds=request.json["grace"])
+        if "nag" in request.json:
+            check.nag = td(seconds=request.json["nagging"])
 
         check.save()
 

@@ -64,6 +64,18 @@
                     {% endif %}
                 </td>
             </tr>
+            <tr>
+                <th>Nag</th>
+                <td>{{ check.nag|hc_duration }}</td>
+                <td>
+                    <span>
+                        {% load static %}
+                        {% if check.nag_mode == "on" %}
+                            <img src="{% static 'img/nag-64.png'%}" alt="Nag" height="24" width="24" />
+                        {% endif %}
+                    </span>
+                </td>
+            </tr>
         </table>
 
 
@@ -83,6 +95,12 @@
                 data-timeout="{{ check.timeout.total_seconds }}"
                 data-grace="{{ check.grace.total_seconds }}"
                 class="btn btn-default timeout-grace">Change Period</a>
+
+            <a
+                href="#"
+                data-url="{% url 'hc-nag-interval' check.code %}"
+                data-naginterval="{{ check.nag.total_seconds }}"
+                class="btn btn-default nags">Configure Nag</a>
 
             <a href="{% url 'hc-log' check.code %}" class="btn btn-default">Log</a>
         </div>

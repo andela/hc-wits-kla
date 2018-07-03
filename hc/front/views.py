@@ -17,7 +17,7 @@ from hc.api.decorators import uuid_or_400
 from hc.accounts.models import REPORT_PERIOD_CHOICES
 from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping
 from hc.front.forms import (AddChannelForm, AddWebhookForm, NameTagsForm,
-                            TimeoutForm)
+                            TimeoutForm, NagIntervalForm)
 
 
 # from itertools recipes:
@@ -222,6 +222,22 @@ def update_timeout(request, code):
 
     return redirect("hc-checks")
 
+
+@login_required
+@uuid_or_400
+def update_nag_interval(request, code):
+    assert request.method == "POST"
+
+    check = get_object_or_404(Check, code=code)
+    if check.user != request.team.user:
+        return HttpResponseForbidden()
+
+    form = NagIntervalForm(request.POST)
+    if form.is_valid():
+        check.nag = td(seconds=form.cleaned_data["nagging"])
+        check.save()
+
+    return redirect("hc-checks")
 
 @login_required
 @uuid_or_400

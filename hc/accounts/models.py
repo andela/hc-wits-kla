@@ -11,6 +11,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from hc.lib import emails
+from hc.api.models import Check
 
 REPORT_PERIOD_CHOICES = {
     'Daily': 1,
@@ -86,15 +87,18 @@ class Profile(models.Model):
     def invite(self, user):
         member = Member(team=self, user=user)
         member.save()
-
         # Switch the invited user over to the new team so they
         # notice the new team on next visit:
         user.profile.current_team = self
         user.profile.save()
-
         user.profile.send_instant_login_link(self)
 
 
 class Member(models.Model):
     team = models.ForeignKey(Profile)
     user = models.ForeignKey(User)
+    assigned_jobs = models.ManyToManyField(Check)
+    
+    def __str__(self):
+        return self.user.username
+        

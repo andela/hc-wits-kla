@@ -53,6 +53,16 @@ table.table tr > th.th-name {
     border: 1px dotted #AAA;
 }
 
+#checks-table .nags {
+    border: 1px solid rgba(0, 0, 0, 0);
+    padding: 6px;
+    display: block;
+}
+
+#checks-table tr:hover .nags {
+    border: 1px dotted #AAA;
+}
+
 .checks-subline {
     color: #888;
     white-space: nowrap;
@@ -117,4 +127,3 @@ tr:hover .copy-link {
     line-height: 36px;
     color: #333;
 }
-

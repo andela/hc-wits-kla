@@ -101,6 +101,38 @@ $(function () {
     });
 
 
+    var nagIntervalSlider = document.getElementById("nag-interval-slider");
+    noUiSlider.create(nagIntervalSlider, {
+        start: [20],
+        connect: "lower",
+        range: {
+            'min': [60, 60],
+            '15%': [3600, 900],
+            '27.5%': [86400, 43200],
+            '40%': [604800, 86400],
+            '55%': [7257600, 86400],
+            '70%': [15552000, 86400],
+            '85%': [23328000, 86400],
+            'max': 31536000,
+        },
+        pips: {
+            mode: 'values',
+            values: [60, 3600, 86400, 604800, 7257600, 15552000, 23328000, 31536000],
+            density: 4,
+            format: {
+                to: secsToText,
+                from: function() {}
+            }
+        }
+    });
+
+    nagIntervalSlider.noUiSlider.on("update", function(a, b, value) {
+        var rounded = Math.round(value);
+        $("#nag-interval-slider-value").text(secsToText(rounded));
+        $("#nag-interval-period").val(rounded);
+    });
+
+
     $('[data-toggle="tooltip"]').tooltip();
 
     $(".my-checks-name").click(function() {
@@ -122,6 +154,16 @@ $(function () {
         periodSlider.noUiSlider.set($this.data("timeout"))
         graceSlider.noUiSlider.set($this.data("grace"))
         $('#update-timeout-modal').modal({"show":true, "backdrop":"static"});
+
+        return false;
+    });
+
+    $(".nags").click(function() {
+        var $this = $(this);
+
+        $("#nag-interval-form").attr("action", $this.data("url"));
+        nagIntervalSlider.noUiSlider.set($this.data("naginterval"))
+        $('#update-nag-interval').modal({"show":true, "backdrop":"static"});
 
         return false;
     });

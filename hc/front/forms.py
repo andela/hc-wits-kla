@@ -26,6 +26,14 @@ class TimeoutForm(forms.Form):
     grace = forms.IntegerField(min_value=60, max_value=31536000)
 
 
+class NagIntervalForm(forms.Form):
+    """
+    Sets the Nag Interview of a check with minimum value of 1 minutes (60 seconds) and maximum value of 1
+    year (31536000 seconds).
+    """
+    nagging = forms.IntegerField(min_value=60, max_value=31536000)
+
+
 class AddChannelForm(forms.ModelForm):
 
     class Meta:

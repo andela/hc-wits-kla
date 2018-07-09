@@ -65,7 +65,7 @@
                 </td>
             </tr>
             <tr>
-                <th>Nag</th>
+                <th>Nag Interval</th>
                 <td>{{ check.nag|hc_duration }}</td>
                 <td>
                     <span>
@@ -100,7 +100,7 @@
                 href="#"
                 data-url="{% url 'hc-nag-interval' check.code %}"
                 data-naginterval="{{ check.nag.total_seconds }}"
-                class="btn btn-default nags">Configure Nag</a>
+                class="btn btn-default nags">Change Nag Interval</a>
 
             <a href="{% url 'hc-log' check.code %}" class="btn btn-default">Log</a>
         </div>

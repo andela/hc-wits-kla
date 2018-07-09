@@ -21,7 +21,6 @@ HOST = "localhost"
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret')
 DEBUG = os.environ.get('DEBUG', False)
 ALLOWED_HOSTS = ['*']
-DEFAULT_FROM_EMAIL = 'healthchecks@example.org'
 USE_PAYMENTS = False
 
 
@@ -142,9 +141,13 @@ STATICFILES_FINDERS = (
 )
 COMPRESS_OFFLINE = True
 
-EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.googlemail.com'
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 # Slack integration -- override these in local_settings
 SLACK_CLIENT_ID = None

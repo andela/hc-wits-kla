@@ -9,6 +9,7 @@ check_urls = [
     url(r'^remove/$', views.remove_check, name="hc-remove-check"),
     url(r'^nag/$', views.update_nag_interval, name="hc-nag-interval"),
     url(r'^log/$', views.log, name="hc-log"),
+    url(r'^priority/$', views.update_priority, name="hc-update-priority"),
 ]
 
 channel_urls = [

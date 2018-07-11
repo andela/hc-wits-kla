@@ -10,4 +10,7 @@ urlpatterns = [
     url(r'^badge/([\w-]+)/([\w-]{8})/([\w-]+).svg$', views.badge, name="hc-badge"),
     url(r'^allocate_jobs/$', views.allocate_jobs, name = "allocate-jobs"),
     url(r'^view_assigned_jobs/$', views.view_assigned_jobs, name="hc-view-assigned-jobs"),
+    url(r'^checks/([\w-]+)/escalate/form', views.view_escalate_check, name="hc-escalate-form"),
+    # url(r'^checks/([\w-]+)/escalate', views.escalate_check, name="hc-escalate-check"),
+    url(r'^checks/escalate', views.escalate_check, name="hc-escalate-check"),
 ]

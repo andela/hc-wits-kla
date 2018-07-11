@@ -8,10 +8,10 @@ $(function () {
     var YEAR = {name: "year", nsecs: DAY.nsecs * 365};
     var UNITS = [YEAR, MONTH, WEEK, DAY, HOUR, MINUTE];
 
-    var secsToText = function(total) {
+    var secsToText = function (total) {
         var remainingSeconds = Math.floor(total);
         var result = "";
-        for (var i=0, unit; unit=UNITS[i]; i++) {
+        for (var i = 0, unit; unit = UNITS[i]; i++) {
             if (unit === WEEK && remainingSeconds % unit.nsecs != 0) {
                 // Say "8 days" instead of "1 week 1 day"
                 continue
@@ -52,12 +52,13 @@ $(function () {
             density: 4,
             format: {
                 to: secsToText,
-                from: function() {}
+                from: function () {
+                }
             }
         }
     });
 
-    periodSlider.noUiSlider.on("update", function(a, b, value) {
+    periodSlider.noUiSlider.on("update", function (a, b, value) {
         var rounded = Math.round(value);
         $("#period-slider-value").text(secsToText(rounded));
         $("#update-timeout-timeout").val(rounded);
@@ -84,12 +85,13 @@ $(function () {
             density: 4,
             format: {
                 to: secsToText,
-                from: function() {}
+                from: function () {
+                }
             }
         }
     });
 
-    graceSlider.noUiSlider.on("update", function(a, b, value) {
+    graceSlider.noUiSlider.on("update", function (a, b, value) {
         var rounded = Math.round(value);
         $("#grace-slider-value").text(secsToText(rounded));
         $("#update-timeout-grace").val(rounded);
@@ -116,12 +118,13 @@ $(function () {
             density: 4,
             format: {
                 to: secsToText,
-                from: function() {}
+                from: function () {
+                }
             }
         }
     });
 
-    nagIntervalSlider.noUiSlider.on("update", function(a, b, value) {
+    nagIntervalSlider.noUiSlider.on("update", function (a, b, value) {
         var rounded = Math.round(value);
         $("#nag-interval-slider-value").text(secsToText(rounded));
         $("#nag-interval-period").val(rounded);
@@ -130,7 +133,7 @@ $(function () {
 
     $('[data-toggle="tooltip"]').tooltip();
 
-    $(".my-checks-name").click(function() {
+    $(".my-checks-name").click(function () {
         var $this = $(this);
 
         $("#update-name-form").attr("action", $this.data("url"));
@@ -142,28 +145,28 @@ $(function () {
         return false;
     });
 
-    $(".timeout-grace").click(function() {
+    $(".timeout-grace").click(function () {
         var $this = $(this);
 
         $("#update-timeout-form").attr("action", $this.data("url"));
         periodSlider.noUiSlider.set($this.data("timeout"))
         graceSlider.noUiSlider.set($this.data("grace"))
-        $('#update-timeout-modal').modal({"show":true, "backdrop":"static"});
+        $('#update-timeout-modal').modal({"show": true, "backdrop": "static"});
 
         return false;
     });
 
-    $(".nags").click(function() {
+    $(".nags").click(function () {
         var $this = $(this);
 
         $("#nag-interval-form").attr("action", $this.data("url"));
         nagIntervalSlider.noUiSlider.set($this.data("naginterval"))
-        $('#update-nag-interval').modal({"show":true, "backdrop":"static"});
+        $('#update-nag-interval').modal({"show": true, "backdrop": "static"});
 
         return false;
     });
 
-    $(".check-menu-remove").click(function() {
+    $(".check-menu-remove").click(function () {
         var $this = $(this);
 
         $("#remove-check-form").attr("action", $this.data("url"));
@@ -172,6 +175,75 @@ $(function () {
 
         return false;
     });
+
+    $("#escalate-button").click(function (e) {
+        var url = e.target.getAttribute("data-url");
+        // $("#update-priority").val(priority);
+        $("#escalate-check-form").attr("action", url).submit();
+        return false;
+    });
+
+    $(".check-menu-escalate").click
+    (function(e){
+
+            var url = e.target.getAttribute("data-url");
+            var token = e.target.getAttribute("data-token");
+            var member_id = e.target.getAttribute("data-id");
+            $.ajax({
+
+                type: "POST",
+                url: url,
+                headers: {
+                    "X-CSRFToken":
+                        token
+                }
+                ,
+                success: function (data) {
+                    var receivedArray = data
+
+                    console.log(typeof receivedArray)
+
+                    var table_header = '<tr> <th scope="col">Assigned</th> <th scope="col">email</th> </tr> '
+
+                    $("#escalate-table-header").empty();
+                    // $("#escalate-table-header").append(table_header);
+
+                    $("#escalate-table-body").empty();
+
+                    $.each(receivedArray, function(index, value){
+                        $.each(value, function (index, value) {
+                            var table_body ='<tr><td><a href="#"><label>'+'<b>Escalate to  </b>'+
+                                assigned(value['assigned'], value['member']['id'], value['check'])+
+                                '</label></a></td><td>'+ value['member']['email']+'</td></tr>';
+
+                            $("#escalate-table-body").append(table_body);
+
+                            console.log(value)
+                        });
+
+                    });
+
+
+                    console.log('success');
+                    $('#escalate-check-modal').modal("show");
+                }
+                ,
+                failure: function () {
+                    console.log('failure')}
+            });
+
+            function assigned(assign, member_id, check_code){
+                $("#escalate-check-code").val(check_code);
+                if(assign == true){
+                    return '<input type="checkbox" checked value="'+member_id+' '+check_code+'" name="check_status"/>'
+                }
+                else{
+                    return '<input type="checkbox" value="'+member_id+' '+check_code+'"  name="check_status"/>'
+                }
+            };
+
+    }
+    );
 
 
     $("#my-checks-tags button").click(function() {
@@ -214,6 +286,14 @@ $(function () {
     $(".pause-check").click(function(e) {
         var url = e.target.getAttribute("data-url");
         $("#pause-form").attr("action", url).submit();
+        return false;
+    });
+
+    $(".update-priority").click(function(e) {
+        var url = e.target.getAttribute("data-url");
+        var priority = e.target.getAttribute("data-priority");
+        $("#update-priority").val(priority);
+        $("#priority-form").attr("action", url).submit();
         return false;
     });
 

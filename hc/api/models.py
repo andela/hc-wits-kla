@@ -19,6 +19,12 @@ STATUSES = (
     ("new", "New"),
     ("paused", "Paused")
 )
+
+CHECK_PRIORITIES = (
+    ("high", "High"),
+    ("normal", "Normal"),
+    ("low", "Low")
+)
 DEFAULT_TIMEOUT = td(days=1)
 DEFAULT_GRACE = td(hours=1)
 DEFAULT_NAG_INTERVAL = td(minutes=10)
@@ -62,6 +68,7 @@ class Check(models.Model):
     alert_after = models.DateTimeField(null=True, blank=True, editable=False)
     status = models.CharField(max_length=6, choices=STATUSES, default="new")
     nag_mode = models.CharField(max_length=4, choices=NAG_MODE, default="off")
+    priority = models.CharField(max_length=6, choices=CHECK_PRIORITIES, default="Normal")
 
     def name_then_code(self):
         if self.name:
@@ -77,6 +84,12 @@ class Check(models.Model):
 
     def email(self):
         return "%s@%s" % (self.code, settings.PING_EMAIL_DOMAIN)
+
+    def set_priority(self, priority_value):
+        acceptable_priorities = ['high', 'normal', 'low']
+        if str(priority_value).lower() in acceptable_priorities:
+            self.priority = str(priority_value).capitalize()
+            self.save()
 
     def send_alert(self):
         if self.status not in ("up", "down"):

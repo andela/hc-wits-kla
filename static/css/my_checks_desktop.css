@@ -72,6 +72,10 @@ table.table tr > th.th-name {
     visibility: hidden;
 }
 
+.check-menu-priority {
+    visibility: visible;
+}
+
 .check-menu .icon-settings {
     font-size: 16px;
 }
@@ -126,6 +130,21 @@ tr:hover .copy-link {
     position: relative;
     line-height: 36px;
     color: #333;
+}
+
+.btn-high {
+    background-color: #dc6f00;
+    color: white;
+}
+
+.btn-normal {
+    background-color: rgb(255, 165, 0);
+    color: white;
+}
+
+.btn-low {
+    background-color: rgba(255, 165, 0, 0.45);
+    color: #ffffff;
 }
 
 #checks-table .nag-interval-cell {

@@ -17,6 +17,10 @@ class NameTagsForm(forms.Form):
         return " ".join(l)
 
 
+class PriorityForm(forms.Form):
+    priority = forms.CharField(max_length=6, required=True)
+
+
 class TimeoutForm(forms.Form):
     """
     Sets the timeout and grace periods of a check with minimum value of 1 minute (60 seconds) and maximum value of 1

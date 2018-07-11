@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 HOST = "localhost"
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret')
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', True)
 ALLOWED_HOSTS = ['*']
 USE_PAYMENTS = False
 
@@ -38,7 +38,8 @@ INSTALLED_APPS = (
     'hc.accounts',
     'hc.api',
     'hc.front',
-    'hc.payments'
+    'hc.payments',
+    'hc.blog'
 )
 
 MIDDLEWARE = (
@@ -140,6 +141,7 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 COMPRESS_OFFLINE = True
+COMPRESS_ENABLED = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.googlemail.com'

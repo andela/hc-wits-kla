@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="{% static 'css/log.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/add_pushover.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/settings.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+    {% block css %} {% endblock  %}
     {% endcompress %}
 </head>
 <body class="page-{{ page }}">
@@ -94,15 +96,24 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_authenticated and request.user.profile.reports_allowed %}
-                 <li>
-                    <a href="{% url 'hc-reports' %}"> Reports</a>
-                 </li>
+                {% if request.user.is_authenticated%}
+                    {% if request.user.profile.reports_allowed   %}
+                        <li>
+                           <a href="{% url 'hc-reports' %}"> Reports</a>
+                        </li>
+                    {% endif %}
                 {% endif %}
 
                 <li {% if page == 'docs' %} class="active" {% endif %}>
                     <a href="{% url 'hc-docs' %}">Docs</a>
                 </li>
+
+                {% if request.user.is_authenticated%}
+
+               {% endif %}
+               <li>
+                    <a href="{% url 'hc-blog' %}"> Blog</a>
+               </li>
 
                 <li {% if page == 'about' %} class="active" {% endif %}>
                     <a href="{% url 'hc-about' %}">About</a>

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load blog_tags humanize %}
+{% block title %}{{post.title}} - healthchecks.io{% endblock %}
+
+{% block content %}
+<div class="row">
+    {% if messages %}
+        <div class="col-sm-12">
+            {% for message in messages %}
+            <p class="alert alert-{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+<div class="row">
+    <h3>{{post.title}}</h3>
+    <a href="{% url 'hc-blog' %}?category={{post.category.title}}" class="label label-primary" for="cat">{{post.category.title}}</a>
+    <i>Published on {{ post.publish }}</i><br>
+    <hr>
+</div>
+<div class="row comments">
+     <div>{{post.body |safe}}</div>
+     <br>
+     {% for comment in comments %}
+    <div class="breadcrumb">
+        <i>@{{comment.name}}</i>
+        <p>{{comment.body}}</p>
+    </div>
+    {% endfor %}
+    <div class="row">
+         <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Leave a comment</h4>
+                </div>
+                <div class="panel-body">
+                    <form method="POST" >
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_name">Name</label>
+                            {{ form.name | addcss:"form-control"}}
+                        </div>
+                         <div class="form-group">
+                            <label for="id_email">Email</label>
+                            {{ form.email | addcss:"form-control"}}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_body">Comment</label>
+                            {{ form.body | addcss:"form-control"}}
+                        </div>
+                        <input class="btn btn-default"  type="submit" value="Submit">
+                    </form>
+                </div>
+            </div>
+         </div>
+    </div>
+</div>
+
+{% endblock %}

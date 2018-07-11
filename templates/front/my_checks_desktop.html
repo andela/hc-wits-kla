@@ -206,9 +206,9 @@
                 <ul class="dropdown-menu">
                     <li {% if check.status == "new" or check.status == "paused" %}class="disabled"{% endif %}>
                         <a class="pause-check"
-                        href="#"
-                        data-url="{% url 'hc-pause' check.code %}">
-                        Pause Monitoring
+                            href="#"
+                            data-url="{% url 'hc-pause' check.code %}">
+                            Pause Monitoring
                         </a>
                     </li>
                     <li role="separator" class="divider"></li>

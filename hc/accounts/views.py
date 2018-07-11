@@ -210,15 +210,13 @@ def profile(request):
             continue
 
         badge_urls.append(get_badge_url(username, tag))
-    checks = Check.objects.filter(user = request.user)
 
     ctx = {
         "page": "profile",
         "badge_urls": badge_urls,
         "profile": profile,
         "show_api_key": show_api_key,
-        "report_periods": REPORT_PERIOD_CHOICES,
-        "checks":checks
+        "report_periods": REPORT_PERIOD_CHOICES
     }
 
     return render(request, "accounts/profile.html", ctx)

@@ -57,7 +57,12 @@ class Email(Transport):
             "now": timezone.now(),
             "show_upgrade_note": show_upgrade_note
         }
-        emails.alert(self.channel.value, ctx)
+        assigned_members = check.member_set.all()
+        if assigned_members:
+            for member in assigned_members:
+                emails.alert(member.user.email, ctx)
+        else:
+            emails.alert(check.user.email, ctx)
 
 
 class HttpTransport(Transport):

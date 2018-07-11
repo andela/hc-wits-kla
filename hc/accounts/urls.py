@@ -23,4 +23,6 @@ urlpatterns = [
 
    url(r'^switch_team/([\w-]+)/$',
         views.switch_team, name="hc-switch-team"),
+
+
 ]

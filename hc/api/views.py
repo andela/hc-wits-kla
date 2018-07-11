@@ -128,7 +128,6 @@ def allocate_jobs(request):
     Assign or unassign jobs to a ream member
     """
     if request.method == 'POST':
-        print(request.POST)
         #get team member
         member_id = request.POST.get('member_id', '')
         team_member = Member.objects.get(id = member_id)

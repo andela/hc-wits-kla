@@ -10,13 +10,8 @@ $(function () {
 
     var secsToText = function(total) {
         var remainingSeconds = Math.floor(total);
-        var remainingDays = Math.floor(total);
         var result = "";
         for (var i=0, unit; unit=UNITS[i]; i++) {
-            if (unit === MONTH && remainingDays % unit.nsecs != 0) {
-                // Say "31 days" instead of "1 month 1 day"
-                continue
-            }
             if (unit === WEEK && remainingSeconds % unit.nsecs != 0) {
                 // Say "8 days" instead of "1 week 1 day"
                 continue
@@ -46,14 +41,14 @@ $(function () {
             '15%': [3600, 900],
             '27.5%': [86400, 43200],
             '40%': [604800, 86400],
-            '55%': [7257600, 86400],
+            '55%': [5184000, 86400],
             '70%': [15552000, 86400],
             '85%': [23328000, 86400],
             'max': 31536000,
         },
         pips: {
             mode: 'values',
-            values: [60, 3600, 86400, 604800, 7257600, 15552000, 23328000, 31536000],
+            values: [60, 3600, 86400, 604800, 5184000, 15552000, 23328000, 31536000],
             density: 4,
             format: {
                 to: secsToText,
@@ -78,14 +73,14 @@ $(function () {
             '15%': [3600, 900],
             '27.5%': [86400, 43200],
             '40%': [604800, 86400],
-            '55%': [7257600, 86400],
+            '55%': [5184000, 86400],
             '70%': [15552000, 86400],
             '85%': [23328000, 86400],
             'max': 31536000,
         },
         pips: {
             mode: 'values',
-            values: [60, 3600, 86400, 604800, 7257600, 15552000, 23328000, 31536000],
+            values: [60, 3600, 86400, 604800, 5184000, 15552000, 23328000, 31536000],
             density: 4,
             format: {
                 to: secsToText,

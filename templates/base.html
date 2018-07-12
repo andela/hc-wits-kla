@@ -118,6 +118,26 @@
                 <li {% if page == 'about' %} class="active" {% endif %}>
                     <a href="{% url 'hc-about' %}">About</a>
                 </li>
+
+                {% if request.user.is_authenticated %}
+                <li {% if page == 'onboarding' %} class="active check-menu dropdown" {% endif %}>
+                    <a class="dropdown-toggle" href="#" data-toggle="dropdown">Onboarding</a>
+                    <ul class="dropdown-menu">
+                        <li {% if page == 'faqs' %} class="active" {% endif %}>
+                            <a href="{% url 'hc-faqs' %}" class="faqs">
+                                FAQs
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li {% if page == 'tutorials' %} class="active" {% endif %}>
+                            <a href="{% url 'hc-tutorials' %}" >
+                                Tutorials
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+
             </ul>
 
 
@@ -183,12 +203,23 @@
         </div>
     </footer>
 
-
     {% block scripts %}
     {% compress js %}
     <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     {% endcompress %}
     {% endblock %}
+
+    <!-- Start of LiveChat (www.livechatinc.com) code -->
+    <script type="text/javascript">
+    window.__lc = window.__lc || {};
+    window.__lc.license = 9937397;
+    (function() {
+      var lc = document.createElement('script'); lc.type = 'text/javascript'; lc.async = true;
+      lc.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'cdn.livechatinc.com/tracking.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(lc, s);
+    })();
+    </script>
+    <!-- End of LiveChat code -->
 </body>
 </html>

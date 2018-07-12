@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}About - healthchecks.io{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+
+        <h3>Background </h3>
+        <p>
+            healthchecks.io is an open source project. The code is on
+            <a href="https://github.com/healthchecks/healthchecks">GitHub</a>,
+            it has BSD license, and is accepting contributions.
+        </p>
+
+        <h3>Getting Started Tutorials</h3>
+
+        <div class="row">
+            <div class="col-sm-12">
+                {% if tutorials %}
+                    {% for tutorial in tutorials %}
+                    <h3>{{ tutorial.header }}</h3>
+                    <p>{{ tutorial.description }}</p>
+                    <iframe width="960" height="615" src="{{ tutorial.video_link }}"
+                    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    {% endfor %}
+                {% else %}
+                <div class="alert alert-info">There are currently no tutorials available.</div>
+                {% endif %}
+                </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

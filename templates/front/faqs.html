@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}About - healthchecks.io{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+
+        <h3>Frequently Asked Questions </h3>
+        <p>
+            For all the FAQs you've got, we have endeavored to provide for you first hand information to quench that curiosity.
+        </p>
+
+        <div class="panel-group" id="accordion">
+
+            {% if faqs %}
+                {% for faq in faqs %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#{{ faq.id }}">{{ faq.question }}</a>
+                        </h4>
+                        </div>
+                        <div id="{{ faq.id }}" class="panel-collapse collapse">
+                        <div class="panel-body">{{ faq.answer }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+            <div class="alert alert-info">There are currently no FAQs available.</div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

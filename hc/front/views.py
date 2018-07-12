@@ -15,7 +15,7 @@ from django.utils.crypto import get_random_string
 from django.utils.six.moves.urllib.parse import urlencode
 from hc.api.decorators import uuid_or_400
 from hc.accounts.models import REPORT_PERIOD_CHOICES
-from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping
+from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping, Tutorial, Faq
 from hc.front.forms import (AddChannelForm, AddWebhookForm, NameTagsForm,
                             TimeoutForm, NagIntervalForm)
 from hc.accounts.models import Member
@@ -130,6 +130,29 @@ def failed_checks(request):
     }
 
     return render(request, "front/failed_checks.html", ctx)
+
+@login_required
+def hc_tutorials(request):
+    q = Tutorial.objects.order_by("id")
+    tutorials = list(q)
+
+    ctx = {
+        "page": "tutorials",
+        "tutorials": tutorials
+    }
+
+    return render(request, "front/tutorials.html", ctx)
+
+@login_required
+def faq(request):
+    q = Faq.objects.order_by("id")
+    faqs = list(q)
+
+    ctx = {
+        "page": "faqs",
+        "faqs": faqs
+    }
+    return render(request, "front/faqs.html", ctx)
 
 
 def _welcome_check(request):

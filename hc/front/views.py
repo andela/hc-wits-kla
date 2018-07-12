@@ -44,7 +44,8 @@ def my_reports(request):
     ctx = {
         'start_date': start_date,
         'end_date': now,
-        'checks': checks
+        'checks': checks,
+        'ping_endpoint': settings.PING_ENDPOINT
     }
     return render(request, 'front/my_reports.html', ctx)
 
@@ -80,6 +81,7 @@ def my_checks(request):
     }
 
     return render(request, "front/my_checks.html", ctx)
+
 
 @login_required
 def failed_checks(request):
@@ -238,6 +240,7 @@ def update_nag_interval(request, code):
         check.save()
 
     return redirect("hc-checks")
+
 
 @login_required
 @uuid_or_400

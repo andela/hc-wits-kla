@@ -23,25 +23,42 @@
             <tr>
                 <th>Status</th>
                 <th class="th-name">Name</th>
+                <th>Ping URL</th>
                 <th>Last Ping</th>
             </tr>
           {% for check in checks %}
                 <tr class="channel-row">
-                    <td>
+                    <td class="indicator-cell">
                         {% if check.get_status == "new" %}
-                            <span class="label label-default">NEW</span>
+                            <span class="status icon-up new"
+                                data-toggle="tooltip" title="New. Has never received a ping."></span>
                         {% elif check.get_status == "paused" %}
-                            <span class="label label-default">PAUSED</span>
+                            <span class="status icon-paused"
+                                data-toggle="tooltip" title="Monitoring paused. Ping to resume."></span>
                         {% elif check.in_grace_period %}
-                            <span class="label label-warning">LATE</span>
+                            <span class="status icon-grace"></span>
                         {% elif check.get_status == "up" %}
-                            <span class="label label-success">UP</span>
+                            <span class="status icon-up"></span>
                         {% elif check.get_status == "down" %}
-                            <span class="label label-danger">DOWN</span>
+                            <span class="status icon-down"></span>
                         {% endif %}
                     </td>
-                    <td class="name-cell">
-                        {{ check.name }}
+                    <td width="20%" class="name-cell">
+                       {% if check.name %}
+                       <div> {{ check.name }}</div>
+                       {% else %}
+                       <div class="my-checks-name unnamed">unnamed</div>
+                       {% endif %}
+                    </td>
+                    <td class="url-cell">
+                        <span class="my-checks-url">
+                            <span class="base">{{ ping_endpoint }}</span>{{ check.code }}
+                        </span>
+                        <button
+                            class="copy-link hidden-sm"
+                            data-clipboard-text="{{ check.url }}">
+                            copy
+                        </button>
                     </td>
                     <td class="timeout-cell">
                         {% if check.last_ping %}
@@ -67,6 +84,25 @@
 {% block scripts %}
 {% compress js %}
 <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
-<script src="{% static 'js/bootstrap.min.js' %}"></script>`
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/clipboard.min.js' %}"></script>
+<script>
+    var clipboard = new Clipboard('button.copy-link');
+    $("button.copy-link").mouseout(function(e) {
+        setTimeout(function() {
+            e.target.textContent = "copy";
+        }, 300);
+    })
+
+    clipboard.on('success', function(e) {
+        e.trigger.textContent = "copied!";
+        e.clearSelection();
+    });
+
+    clipboard.on('error', function(e) {
+        var text = e.trigger.getAttribute("data-clipboard-text");
+        prompt("Press Ctrl+C to select:", text)
+    });
+</script>
 {% endcompress %}
 {% endblock %}

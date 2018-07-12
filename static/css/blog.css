@@ -1,0 +1,29 @@
+.blog-row {
+    margin-bottom: 100px;
+}
+
+.errorlist {
+    list-style: none;
+}
+
+.errorlist li {
+    color: rgb(173, 39, 39);
+    margin-left: -40px;
+}
+
+.blog-pagination {
+    margin-top: 20px;
+    margin-bottom: 50px;
+}
+
+.blog-posts a {
+    text-decoration: none !important;
+}
+
+.add-category {
+    margin-top: 24px;
+}
+
+.blog-header {
+    margin-bottom: 5px;
+}

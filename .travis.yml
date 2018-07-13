@@ -10,7 +10,6 @@ env:
 addons:
   postgresql: "9.4"
 script:
-  - ./manage.py compress
   - coverage run --omit=*/tests/* --source=hc manage.py test
 after_success: coveralls
 cache: pip

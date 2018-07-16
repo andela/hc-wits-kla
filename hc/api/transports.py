@@ -7,6 +7,12 @@ from six.moves.urllib.parse import quote
 
 from hc.lib import emails
 
+from twilio.rest import Client
+from django.conf import settings
+import os
+import telegram
+from telegram.error import TimedOut
+
 
 def tmpl(template_name, **ctx):
     template_path = "integrations/%s" % template_name
@@ -63,6 +69,38 @@ class Email(Transport):
                 emails.alert(member.user.email, ctx)
         else:
             emails.alert(check.user.email, ctx)
+
+os.environ.get('DATABASE_NAME', ''),
+
+
+class Sms(Transport):
+    def notify(self,check):
+        for channel in check.channel_set.filter(kind="sms"):
+            message = "Hi, the status of your check "+str(check.code)+" is \'" + str(check.get_status())+ "\'" + \
+            ", last ping occured at "+str(check.last_ping)
+            from_ = os.environ.get('TWILIO_FROM_NUMBER')
+            to = channel.value
+            client = Client(
+                os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
+            response = client.messages.create(
+                body=message, to=to, from_=from_)
+
+
+class Telegram(Transport):
+    def notify(self, check):
+        bot = telegram.Bot(token=os.environ.get('TELEGRAM_TOKEN'))
+        message = "the status of your check "+str(check.code)+" is \'" + str(check.get_status())+ "\'" + \
+            ", last ping occured at "+str(check.last_ping)
+        # Incase of poor network, telegram throws a TimeOut exception, catch it here
+        try:
+            for channel in check.channel_set.filter(kind="telegram"):
+                for i in range(0,len(bot.get_updates())):
+                 if bot.get_updates()[i]['message']['chat']['username'] == channel.value:
+                         id = bot.get_updates()[i]['message']['chat']['id']
+                         bot.send_message(chat_id=id,text="Hi "+channel.value+", "+message)
+        except TimedOut:
+            return "Sending message failed"
+
 
 
 class HttpTransport(Transport):

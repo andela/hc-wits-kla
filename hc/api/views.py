@@ -9,12 +9,13 @@ from django.shortcuts import  render, redirect
 
 from hc.api import schemas
 from hc.api.decorators import check_api_key, uuid_or_400, validate_json
-from hc.api.models import Check, Ping
+from hc.api.models import Check, Ping, Channel
 from hc.lib.badges import check_signature, get_badge_svg
 from hc.accounts.models import Member
 from .forms import TeamMemberForm
 
 from hc.api.management.commands.sendalerts import Command
+from hc.api.transports import Sms
 
 
 @csrf_exempt
@@ -28,18 +29,24 @@ def ping(request, code):
         return HttpResponseBadRequest()
     # get the last_ping to update the previous_ping
     previous_ping_time = check.last_ping
+    channels = check.channel_set.all()
+    
+    if check.get_status() in ("new", "paused", "down"):
+        check.status = "up"
+        for channel in channels:
+            channel.notify(check)
 
     check.n_pings = F("n_pings") + 1
     check.ping_before_last_ping = previous_ping_time
     check.last_ping = timezone.now()
-    if check.status in ("new", "paused"):
-        check.status = "up"
+    
 
     if check.nag_mode == "on":
         check.nag_mode = "off"
 
     check.save()
     check.refresh_from_db()
+    
 
     ping = Ping(owner=check)
     headers = request.META

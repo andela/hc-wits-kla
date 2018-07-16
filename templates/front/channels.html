@@ -34,6 +34,8 @@
             {% if ch.kind == "pd" %} PagerDuty {% endif %}
             {% if ch.kind == "po" %} Pushover {% endif %}
             {% if ch.kind == "victorops" %} VictorOps {% endif %}
+            {% if ch.kind == "sms" %} Sms {% endif %}
+            {% if ch.kind == "telegram"%} Telegram {% endif %}
             {% if ch.kind == "pushbullet" %} Pushbullet {% endif %}
             </td>
             <td class="value-cell">
@@ -179,6 +181,28 @@
 
             <a href="{% url 'hc-add-victorops' %}" class="btn btn-primary">Add Integration</a>
         </li>
+   
+        <li>
+            <img src="{% static 'img/integrations/sms-icon-simple.jpg' %}"
+                class="icon" alt="Sms icon" />
+
+            <h2>Direct SMS</h2>
+            <p>Get alerts directly in your phone inbox.</p>
+
+            <a href="{% url 'hc-add-sms' %}" class="btn btn-primary">Add Integration</a>
+        </li>
+
+        <li>
+            <img src="{% static 'img/integrations/telegram.png' %}"
+                class="icon" alt="Telegram icon" />
+
+            <h2>Telegram</h2>
+            <p>Get alerts directly on your telegram.</p>
+
+            <a href="{% url 'hc-add-telegram' %}" class="btn btn-primary">Add Integration</a>
+        </li>
+
+
         {% if enable_pushbullet %}
         <li>
             <img src="{% static 'img/integrations/pushbullet.png' %}"

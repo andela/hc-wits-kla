@@ -118,7 +118,9 @@
         $('#id_body').summernote({
             height: 350
         });
-        $('#id_publish').datetimepicker();
+        $('#id_publish').datetimepicker({
+            minDate: new Date()
+        });
     });
 
     $("#modal-btn-yes").on("click", function(){

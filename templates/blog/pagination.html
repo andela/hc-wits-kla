@@ -1,4 +1,6 @@
-<nav class="blog-pagination">
-        <a class="btn  {% if not page.has_previous %} disabled  btn-default {% else %}  btn-primary {% endif %}" href="{% if page.has_previous %}?page={{page.previous_page_number}}{% endif %}">Previous</a>
-        <a class="btn  {% if not page.has_next %} disabled  btn-default {% else %}  btn-primary {% endif %}" href="{% if  page.has_next %}?page={{page.next_page_number}} {% endif %}">Next</a>
-</nav>
+<div class="row container blog-pagination">
+        <nav>
+                <a class="btn  {% if not page.has_previous %} disabled  btn-info {% else %}  btn-primary {% endif %}" href="{% if page.has_previous %}?page={{page.previous_page_number}}{% endif %}">Previous</a>
+                <a class="btn  {% if not page.has_next %} disabled  btn-info {% else %}  btn-primary {% endif %}" href="{% if  page.has_next %}?page={{page.next_page_number}} {% endif %}">Next</a>
+        </nav>
+</div>

@@ -20,12 +20,13 @@
         <h4 ><a href="{{ post.get_view_absolute_url }}">{{post.title}}</a></h4>
         <a href="{% url 'hc-blog' %}?category={{post.category.title}}"
            class="label label-primary" for="cat">{{post.category.title}}</a>
-        <i>Published on {{ post.publish }}</i><br>
+        <i>Published on {{ post.publish | date:"M d, Y"  }}</i><br>
         <p>{{post.body | safe | truncatewords:100|linebreaks }}</p>
       </div>
     {% endfor %}
-    {% include "blog/pagination.html" with page=posts %}
 </div>
+<br>
+{% include "blog/pagination.html" with page=posts %}
 
 {% else %}
 <div class="alert alert-info">

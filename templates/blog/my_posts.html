@@ -44,7 +44,7 @@
                         {{ post.status }}
                     </td>
                     <td>
-                        {{post.publish}}
+                        {{post.publish |date:"M d, Y"}}
                     </td>
                     <td>
                        <a class="btn btn-default" href="{% url 'hc-edit-post' post.id %}">Edit</a>

@@ -24,8 +24,9 @@
         <p>{{post.body | safe | truncatewords:100|linebreaks }}</p>
       </div>
     {% endfor %}
-    {% include "blog/pagination.html" with page=posts %}
 </div>
+<br>
+{% include "blog/pagination.html" with page=posts %}
 
 {% else %}
 <div class="alert alert-info">

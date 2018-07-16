@@ -213,6 +213,8 @@ class TutorialAdmin(admin.ModelAdmin):
     search_fields = ["header"]
     list_display = ("id", "header", "description", "video_link")
     list_filter = ["header"]
+    list_display_links = ('id', 'header')
+
 
 
 @admin.register(Faq)
@@ -227,3 +229,4 @@ class FaqAdmin(admin.ModelAdmin):
     list_display = ("id", "question", "answer")
 
     list_filter = ["question", "answer"]
+    list_display_links = ('id', 'question')

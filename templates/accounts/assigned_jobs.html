@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load compress staticfiles %}
+{% block content %}
+<div>
+        <div class="modal-dialog">
+            <form id="assign-job-team-member-form" method="post" action="{% url 'allocate-jobs' %}" >
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="assign-job-title">Assign/UnAssign Job</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h1> </h1>
+                        {% if checks %}
+                            <table class="table">
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Name</th>
+                                    <th>Url</th>
+                                    <th>Last Ping</th>
+                                </tr>
+                            {% for check in checks %}
+                                <tr class="check_info">
+                                    <td>
+                                        <input type="checkbox" {% if check.0 %} checked {% endif %}
+                                            class="form-check-input"
+                                            name = "checks-{{ check.1.id }}" id="{{ check.1.pk }}">
+                                    </td>
+                                    <td>{{check.1.name }}</td>
+                                    <td>{{ check.1.url }}</td>
+                                    <td>{{ check.1.last_ping }}</td>
+                                </tr>
+                            {% endfor %}
+                            </table>
+                            {% else %}
+                        <div class="alert alert-info">You don't have any checks yet.</div>
+                    {% endif %}
+                        <input
+                            type="hidden"
+                            name="member_id"
+                            value= {{ member_id }}
+                            id="assign-job-email" />
+                    </div>
+                    <div class="modal-footer">
+                        <a href="{% url 'hc-profile' %}" class="btn btn-default">Cancel</a>
+                        <button
+                        id = "submit_trigger"
+                            type="submit"
+                            name="assign-job"
+                            
+                            class="btn btn-success">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<!---->
+
+{% endblock content %}

@@ -69,22 +69,36 @@
             <div class="panel-body settings-block">
                 <h2>Team Access</h2>
                 {% if profile.member_set.count %}
-                <table class="table">
-                    <tr>
-                        <td>{{ profile.user.email }}</td>
-                        <td>Owner</td>
-                        <td></td>
-                    </tr>
-                    {% for member in profile.member_set.all %}
-                    <tr>
-                        <td>{{ member.user.email }} </td>
-                        <td>Member</td>
-                        <td>
-                            <a href="#" data-email="{{ member.user.email }}" class="pull-right member-remove">Remove</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
+                    <table class="table">
+                        <tr>
+                            <td>{{ profile.user.email }}</td>
+                            <td>Owner</td>
+                            <td></td>
+                        </tr>
+                        {% for member in profile.member_set.all %}
+                        <tr>
+                            <td>
+                                {{ member.user.email }}</td>
+                            <td>Member</td>
+                            <td >
+                                <a href="#viewAssignJobModal"
+                                data-id= "{{member.id}}" 
+                                data-email="{{ member.user.email }}"
+                                data-url="{% url 'hc-view-assigned-jobs' %}"
+                                class="open-AssignJobDialog btn btn-light btn-sm"
+                                data-toggle="modal"
+                                >
+                                Assign Jobs</a>
+                            </td>
+                            <td>
+                                <a
+                                    href="#"
+                                    data-email="{{ member.user.email }}"
+                                    class="pull-right member-remove">Remove</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
                 {% else %}
                 <p>
                     <strong>Invite team members to your account.</strong>
@@ -164,9 +178,6 @@
     </div>
 </div>
 {% endif %}
-
-
-
 <div id="revoke-api-key-modal" class="modal">
     <div class="modal-dialog">
         <form id="revoke-api-key-form" method="post">
@@ -215,6 +226,20 @@
         </form>
     </div>
 </div>
+  <!-- Modal -->
+  <div class="modal fade" id="viewAssignJobModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="ajax_reponse">
+        </div>
+      </div>
+    </div>
+  </div>
 
 <div id="invite-team-member-modal" class="modal">
     <div class="modal-dialog">
@@ -271,7 +296,14 @@
         </form>
     </div>
 </div>
-{% endblock %} {% block scripts %} {% compress js %}
+<form id="team-member-jobs-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="member_id" id="mem-id"/>
+    </form>
+
+{% endblock %}
+
+ {% block scripts %} {% compress js %}
 <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 <script src="{% static 'js/profile.js' %}"></script> {% endcompress %}
@@ -284,5 +316,28 @@
             $('#frequecy-block').hide();
         }
     })
+    $(document).ready
+(
+    function(){
+    $(".open-AssignJobDialog").click(function (e) {
+    var url = e.target.getAttribute("data-url");
+    var member_id = e.target.getAttribute("data-id");
+    $.ajax({
+        type: "POST",
+        url: {% url "hc-view-assigned-jobs" %},
+        headers:{
+        "X-CSRFToken": '{{csrf_token}}'
+            },
+        data:  {
+                "member_id":member_id
+            },
+        success: function( data1 ) {
+            $( "#viewAssignJobModal" ).html( data1 )
+        } 
+        });
+}
+);
+
+} );
 </script>
 {% endblock %}

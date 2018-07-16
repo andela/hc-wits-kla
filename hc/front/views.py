@@ -18,6 +18,7 @@ from hc.accounts.models import REPORT_PERIOD_CHOICES
 from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping
 from hc.front.forms import (AddChannelForm, AddWebhookForm, NameTagsForm,
                             TimeoutForm, NagIntervalForm)
+from hc.accounts.models import Member
 
 
 # from itertools recipes:
@@ -69,16 +70,31 @@ def my_checks(request):
                 down_tags.add(tag)
             elif check.in_grace_period():
                 grace_tags.add(tag)
+    if request.user in [member.user for member in Member.objects.all()]:
+        team_member = Member.objects.get(user=request.user)
 
-    ctx = {
-        "page": "checks",
-        "checks": checks,
-        "now": timezone.now(),
-        "tags": counter.most_common(),
-        "down_tags": down_tags,
-        "grace_tags": grace_tags,
-        "ping_endpoint": settings.PING_ENDPOINT
-    }
+        assigned_jobs = list(team_member.assigned_jobs.iterator())
+
+        ctx = {
+            "page": "checks",
+            "checks": checks,
+            "now": timezone.now(),
+            "tags": counter.most_common(),
+            "down_tags": down_tags,
+            "grace_tags": grace_tags,
+            "ping_endpoint": settings.PING_ENDPOINT,
+            "assigned_jobs": assigned_jobs
+        }
+    else:
+        ctx = {
+            "page": "checks",
+            "checks": checks,
+            "now": timezone.now(),
+            "tags": counter.most_common(),
+            "down_tags": down_tags,
+            "grace_tags": grace_tags,
+            "ping_endpoint": settings.PING_ENDPOINT
+        }
 
     return render(request, "front/my_checks.html", ctx)
 
@@ -626,3 +642,4 @@ def privacy(request):
 
 def terms(request):
     return render(request, "front/terms.html", {})
+

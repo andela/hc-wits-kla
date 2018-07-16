@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def handle_many(self):
         """ Send alerts for many checks simultaneously. """
         query = Check.objects.filter(user__isnull=False).select_related("user")
-
+        
         now = timezone.now()
         going_down = query.filter(alert_after__lt=now, status="up")
         going_up = query.filter(alert_after__gt=now, status="down")
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         checks = list(going_down.iterator()) + list(going_up.iterator()) + list(nag.iterator()) + list(nag_last_nag_null.iterator())
         if not checks:
             return False
-
+        
         futures = [executor.submit(self.handle_one, check) for check in checks]
         for future in futures:
             future.result()
@@ -66,7 +66,7 @@ class Command(BaseCommand):
         # it won't process this check again.
         check.status = check.get_status()
         check.save()
-
+        
         tmpl = "\nSending alert, status=%s, code=%s\n"
         self.stdout.write(tmpl % (check.status, check.code))
         errors = check.send_alert()

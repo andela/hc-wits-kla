@@ -16,7 +16,7 @@
 <div class="row">
     <h3>{{post.title}}</h3>
     <a href="{% url 'hc-blog' %}?category={{post.category.title}}" class="label label-primary" for="cat">{{post.category.title}}</a>
-    <i>Published on {{ post.publish }}</i><br>
+    <i>Published on {{ post.publish |date:"M d, Y"  }}</i><br>
     <hr>
 </div>
 <div class="row comments">

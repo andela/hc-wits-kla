@@ -26,4 +26,3 @@ class AddCheckTestCase(BaseTestCase):
         r = self.client.post(url)
 
         self.assertEqual(302, r.status_code)
-

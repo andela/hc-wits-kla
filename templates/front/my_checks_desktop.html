@@ -75,6 +75,22 @@
                 Never
             {% endif %}
             </td>
+
+            <td class="nag-interval-cell">
+                <span
+                    data-url="{% url 'hc-nag-interval' check.code %}"
+                    data-naginterval="{{ check.nag.total_seconds }}"
+                    class="nags">
+                    {{ check.nag|hc_duration }}
+                </span>
+                <span>
+                    {% load static %}
+                    {% if check.nag_mode == "on" %}
+                        <img src="{% static 'img/nag-64.png'%}" alt="Nag" height="24" width="24" />
+                    {% endif %}
+                </span>
+            </td>
+
             <td>
                 <div class="check-menu dropdown">
                     <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">

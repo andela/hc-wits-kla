@@ -101,3 +101,39 @@ class Command(BaseCommand):
                 formatted = timezone.now().isoformat()
                 self.stdout.write("-- MARK %s --" % formatted)
                 # self.nag_user()
+                self.pinged_often()
+
+
+    def pinged_often(self):
+        """
+        -get the check that was last pinged
+        -check the time lag between last ping and the previous ping
+        -if it's greater than the reverse grace, then PINGED QUITE OFTEN
+        -equalise the "ping_before_last_ping" and "last_ping" to avoid repeating the PINGED QUITE OFTEN message
+        """
+        try:
+            check = Check.objects.filter(user__isnull=False,last_ping__isnull=False).latest('last_ping')
+            status = check.get_status()
+
+            if check.status == "up":
+                now = timezone.now()
+                timeout = check.timeout
+                grace = check.grace
+                last_ping = check.last_ping
+                # First time pinging usually has no ping_before_last_ping
+                if bool(check.ping_before_last_ping) is True:
+                    time_taken = last_ping - check.ping_before_last_ping
+                    allowed_time = check.timeout - grace
+                    if datetime.timedelta(seconds=0) < time_taken < allowed_time:
+                        formatted = timezone.now().isoformat()
+                        self.stdout.write("-- PINGED QUITE OFTEN %s --" % formatted)
+                        # set ping_before_last_ping equal to last_ping to avoid spitting out the message continuously
+                        check.ping_before_last_ping = check.last_ping
+                        check.save()
+        except Exception as e:
+            return
+
+
+
+
+

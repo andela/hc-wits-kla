@@ -14,6 +14,8 @@ from hc.lib.badges import check_signature, get_badge_svg
 from hc.accounts.models import Member
 from .forms import TeamMemberForm
 
+from hc.api.management.commands.sendalerts import Command
+
 
 @csrf_exempt
 @uuid_or_400
@@ -21,10 +23,14 @@ from .forms import TeamMemberForm
 def ping(request, code):
     try:
         check = Check.objects.get(code=code)
+
     except Check.DoesNotExist:
         return HttpResponseBadRequest()
+    # get the last_ping to update the previous_ping
+    previous_ping_time = check.last_ping
 
     check.n_pings = F("n_pings") + 1
+    check.ping_before_last_ping = previous_ping_time
     check.last_ping = timezone.now()
     if check.status in ("new", "paused"):
         check.status = "up"

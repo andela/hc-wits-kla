@@ -127,3 +127,8 @@ tr:hover .copy-link {
     line-height: 36px;
     color: #333;
 }
+
+#checks-table .nag-interval-cell {
+    display: inline-flex;
+    align-items: center;
+}

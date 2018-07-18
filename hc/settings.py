@@ -128,9 +128,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-# SITE_ROOT = "https://health-checks-wits.herokuapp.com"
-SITE_ROOT="http://localhost:8000"
+SITE_ROOT = os.environ.get("SITE_ROOT")
 PING_ENDPOINT = SITE_ROOT + "/ping/"
 PING_EMAIL_DOMAIN = HOST
 STATIC_URL = '/static/'

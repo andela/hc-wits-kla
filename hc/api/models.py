@@ -196,6 +196,7 @@ class Channel(models.Model):
             raise NotImplementedError("Unknown channel kind: %s" % self.kind)
 
     def notify(self, check):
+        
         # Make 3 attempts--
         for x in range(0, 3):
             error = self.transport.notify(check) or ""

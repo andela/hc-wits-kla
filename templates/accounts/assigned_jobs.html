@@ -16,6 +16,7 @@
                             <table class="table">
                                 <tr>
                                     <th>Select</th>
+                                    <th></th>
                                     <th>Name</th>
                                     <th>Url</th>
                                     <th>Last Ping</th>
@@ -27,9 +28,22 @@
                                             class="form-check-input"
                                             name = "checks-{{ check.1.id }}" id="{{ check.1.pk }}">
                                     </td>
-                                    <td>{{check.1.name }}</td>
-                                    <td>{{ check.1.url }}</td>
-                                    <td>{{ check.1.last_ping }}</td>
+                                    <td>
+                                            <div class="form-row align-items-center">
+                                              <div class="col-auto my-1">
+                                                <label class="mr-sm-2" for="inlineFormCustomSelect">Priority</label>
+                                                <select class="custom-select mr-sm-2"  name="value">
+                                                  <!-- <option value="normal" ></option> -->
+                                                  <option {% if check.2 == "normal" %} selected {% endif %} value="{{check.1.id}}-high"  >High</option>
+                                                  <option {% if check.2 == "low" %} selected {% endif %} value="{{check.1.id}}-low" >Low</option>
+                                                  <option {% if check.2 == "high" %} selected {% endif %} value="{{check.1.id}}-normal" >Normal</option>
+                                                </select>
+                                            </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ check.1.name }}</td>
+                                        <td>{{ check.1.url }}</td>
+                                        <td>{{ check.1.last_ping}}</td>
                                 </tr>
                             {% endfor %}
                             </table>
@@ -48,7 +62,6 @@
                         id = "submit_trigger"
                             type="submit"
                             name="assign-job"
-                            
                             class="btn btn-success">Save</button>
                     </div>
                 </div>
@@ -57,4 +70,16 @@
     </div>
 <!---->
 
+<!-- <div class="dropdown show">
+    <a class="btn btn-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Priority
+    </a>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+      <li class="dropdown-item" > <a href="#">High</a></li>
+      <li class="dropdown-item" ><a href="#">Low</a></li>
+      <li class="dropdown-item" ><a href="#">Normal</a></li>
+    </div>
+  </div> -->
+{% block scripts %}
+{% endblock %}
 {% endblock content %}

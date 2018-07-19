@@ -11,7 +11,7 @@ from hc.api import schemas
 from hc.api.decorators import check_api_key, uuid_or_400, validate_json
 from hc.api.models import Check, Ping
 from hc.lib.badges import check_signature, get_badge_svg
-from hc.accounts.models import Member
+from hc.accounts.models import Member, Priority
 from .forms import TeamMemberForm
 
 
@@ -128,16 +128,29 @@ def allocate_jobs(request):
     Assign or unassign jobs to a ream member
     """
     if request.method == 'POST':
+        print(request.POST)
         #get team member
+        priorities = (request.POST.getlist('value'))
         member_id = request.POST.get('member_id', '')
         team_member = Member.objects.get(id = member_id)
         team_member.assigned_jobs.clear()
         for key in request.POST:
+
             if key.startswith('checks-'):
                 check_id = int(key[7:])
                 check = Check.objects.filter(pk=check_id).first()
                 team_member.assigned_jobs.add(check)
                 team_member.save()
+                # value = [key for key in priorities if str(check_id) in str(key)][0]
+                # priority = value[len(str(check_id))+1:]
+                # old_priority = Priority.objects.filter(member=team_member, job=check).first()
+                # if old_priority:
+                #     old_priority.priority = priority
+                #     old_priority.save()
+                #     continue
+                # member_priority = Priority(member=team_member, job=check, priority=priority)
+                # member_priority.save()
+                
         messages.success(request, "Jobs assigned to {} updated!".format(team_member.user.email))
         return redirect('hc-profile')
     return render(request, "accounts/profile.html")
@@ -159,10 +172,14 @@ def view_assigned_jobs(request):
             assigned_team_member_ids = []
             for team_member in assigned_team_members:
                 assigned_team_member_ids.append(team_member.id)
+                value = Priority.objects.filter(member_id=team_member.id,job_id=check.id)
+                if value:
+                    priority = str(value[0].priority)
             if member_id in assigned_team_member_ids:
-                member_jobs.append([True, check])
+                member_jobs.append([True, check, priority])
+                print(member_jobs)
             else:
-                member_jobs.append([False, check])
+                member_jobs.append([False, check,False])
         ctx = {
              'checks': member_jobs,
              'member_id':member_id

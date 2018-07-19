@@ -10,7 +10,7 @@ from django.utils import timezone
 from hc.api.models import Check
 from django.db.models import DateTimeField, ExpressionWrapper, F
 
-executor = ThreadPoolExecutor(max_workers=10)
+executor = ThreadPoolExecutor(max_workers=2)
 logger = logging.getLogger(__name__)
 
 

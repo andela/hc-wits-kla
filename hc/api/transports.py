@@ -61,9 +61,10 @@ class Email(Transport):
         if assigned_members:
             for member in assigned_members:
                 emails.alert(member.user.email, ctx)
+            else:
+                emails.alert(check.user.email, ctx)
         else:
             emails.alert(check.user.email, ctx)
-
 
 class HttpTransport(Transport):
 

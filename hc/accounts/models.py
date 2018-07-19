@@ -13,6 +13,12 @@ from django.utils import timezone
 from hc.lib import emails
 from hc.api.models import Check
 
+USER_PRIORITIES = (
+    ("high", "High"),
+    ("low", "Low"),
+    ("normal", "Normal")
+)
+
 REPORT_PERIOD_CHOICES = {
     'Daily': 1,
     'Weekly': 7,
@@ -103,3 +109,13 @@ class Member(models.Model):
     
     def __str__(self):
         return self.user.username
+        
+
+class Priority(models.Model):
+    member = models.ForeignKey(Member)
+    job = models.ForeignKey(Check)
+    priority = models.CharField(max_length=8, choices=USER_PRIORITIES)
+
+    def __str__(self):
+        return self.member.user.username + self.priority
+

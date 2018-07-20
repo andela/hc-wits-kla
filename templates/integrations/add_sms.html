@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load compress humanize staticfiles hc_extras %}
+
+{% block title %}Notification Channels - healthchecks.io{% endblock %}
+
+
+{% block content %}
+<div class="row">
+<div class="col-sm-12">
+    <h1>Sms</h1>
+
+    <p>Get a message notification when a check goes up or down.</p>
+
+    <p>
+        <strong>Tip:</strong>
+        Add multiple phone numebrs to send alerts to multiple members.
+    </p>
+
+    <h2>Integration Settings</h2>
+
+    <form method="post" class="form-horizontal" action="{% url 'hc-add-channel' %}">
+        {% csrf_token %}
+        <input type="hidden" name="kind" value="sms" />
+        <div class="form-group">
+            <label for="id_email" class="col-sm-2 control-label">Phone number</label>
+            <div class="col-sm-3">
+                <input
+                    id="id_email"
+                    type="sms"
+                    class="form-control"
+                    name="value"
+                    placeholder="+254779954066">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Save Integration</button>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+{% compress js %}
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+{% endcompress %}
+{% endblock %}

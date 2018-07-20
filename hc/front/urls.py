@@ -15,6 +15,8 @@ channel_urls = [
     url(r'^$', views.channels, name="hc-channels"),
     url(r'^add/$', views.add_channel, name="hc-add-channel"),
     url(r'^add_email/$', views.add_email, name="hc-add-email"),
+    url(r'^add_sms/$',views.add_sms, name="hc-add-sms"),
+    url(r'^add_telegram/$',views.add_telegram, name="hc-add-telegram"),
     url(r'^add_webhook/$', views.add_webhook, name="hc-add-webhook"),
     url(r'^add_pd/$', views.add_pd, name="hc-add-pd"),
     url(r'^add_slack/$', views.add_slack, name="hc-add-slack"),
@@ -45,4 +47,6 @@ urlpatterns = [
     url(r'^about/$', views.about, name="hc-about"),
     url(r'^privacy/$', views.privacy, name="hc-privacy"),
     url(r'^terms/$', views.terms, name="hc-terms"),
+
+
 ]

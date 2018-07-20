@@ -9,6 +9,7 @@ from django.db import connection
 from django.utils import timezone
 from hc.api.models import Check
 from django.db.models import DateTimeField, ExpressionWrapper, F
+from hc.api.models import Check, Channel
 
 executor = ThreadPoolExecutor(max_workers=10)
 logger = logging.getLogger(__name__)
@@ -66,7 +67,8 @@ class Command(BaseCommand):
         # it won't process this check again.
         check.status = check.get_status()
         check.save()
-        
+
+
         tmpl = "\nSending alert, status=%s, code=%s\n"
         self.stdout.write(tmpl % (check.status, check.code))
         errors = check.send_alert()
@@ -129,7 +131,7 @@ class Command(BaseCommand):
                         self.stdout.write("-- PINGED QUITE OFTEN %s --" % formatted)
                         # set ping_before_last_ping equal to last_ping to avoid spitting out the message continuously
                         check.ping_before_last_ping = check.last_ping
-                        check.save()
+                        self.handle_one(check)
         except Exception as e:
             return
 

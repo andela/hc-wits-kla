@@ -83,3 +83,15 @@
  #show-usage-modal .tab-content {
      margin-top: 15px;
  }
+
+ .table th, td {
+     text-align: center;
+}
+ .table {
+     width: 75%;
+     margin: auto;
+ }
+
+ .check-menu-escalate {
+     color: red !important;
+ }

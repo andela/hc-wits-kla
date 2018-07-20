@@ -4,6 +4,7 @@
         <th></th>
         <th class="th-name">Name</th>
         <th>Ping URL</th>
+        <th class="th-priority">Priority</th>
         <th class="th-period">
             Period <br />
             <span class="checks-subline">Grace</span>
@@ -51,6 +52,55 @@
                     copy
                 </button>
             </td>
+            <td>
+            <div class="check-menu-priority dropdown">
+                <button class="btn btn-block
+                {% if check.priority == 'Low' %}
+                        btn-low
+
+                {% elif check.priority == 'High' %}
+                    btn-high
+                {% else %}
+                    btn-normal
+                {% endif %}dropdown-toggle" type="button" data-toggle="dropdown">
+                    {{ check.priority }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li {% if check.priority == "High"  %}class="disabled"{% else %} class="update-priority"{% endif %}>
+                        <a
+                           href="#"
+                           data-priority="High"
+                           data-url="{% url 'hc-update-priority' check.code %}">
+                           High
+                        </a>
+                    </li>
+                    <li {% if check.priority == "Normal"  %}class="disabled"{% else %} class="update-priority"{% endif %}>
+                        <a href="#"
+                           data-priority="Normal"
+                           data-url="{% url 'hc-update-priority' check.code %}">
+                            Normal
+                        </a>
+                    </li>
+                    <li {% if check.priority == "Low"  %}class="disabled"{% else %} class="update-priority"{% endif %}>
+                        <a href="#"
+                           data-priority="Low"
+                           data-url="{% url 'hc-update-priority' check.code %}">
+                            Low
+                        </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <a
+                            href="#" class="check-menu-escalate"
+                            data-token = "{{   csrf_token }}"
+                           data-url="{% url 'hc-escalate-form' check.code %}"
+                        >
+                            Escalate
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
             <td class="timeout-cell">
                 <span
                     data-url="{% url 'hc-update-timeout' check.code %}"
@@ -172,6 +222,55 @@
                 data-clipboard-text="{{ check.url }}">
                 copy
             </button>
+        </td>
+        <td>
+            <div class="check-menu-priority dropdown">
+                <button class="btn btn-block
+                {% if check.priority == 'Low' %}
+                        btn-low
+
+                {% elif check.priority == 'High' %}
+                    btn-high
+                {% else %}
+                    btn-normal
+                {% endif %}dropdown-toggle" type="button" data-toggle="dropdown">
+                    {{ check.priority }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li {% if check.priority == "High"  %}class="disabled"{% else %} class="update-priority"{% endif %}>
+                        <a
+                           href="#"
+                           data-priority="High"
+                           data-url="{% url 'hc-update-priority' check.code %}">
+                           High
+                        </a>
+                    </li>
+                    <li {% if check.priority == "Normal"  %}class="disabled"{% else %} class="update-priority"{% endif %}>
+                        <a href="#"
+                           data-priority="Normal"
+                           data-url="{% url 'hc-update-priority' check.code %}">
+                            Normal
+                        </a>
+                    </li>
+                    <li {% if check.priority == "Low"  %}class="disabled"{% else %} class="update-priority"{% endif %}>
+                        <a href="#"
+                           data-priority="Low"
+                           data-url="{% url 'hc-update-priority' check.code %}">
+                            Low
+                        </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <a href="#" class="check-menu-escalate"
+                           data-token = "{{  csrf_token }}"
+                           data-url="{% url 'hc-escalate-form' check.code %}"
+                        >
+
+                            Escalate
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </td>
         <td class="timeout-cell">
             <span

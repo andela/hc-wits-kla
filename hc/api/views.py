@@ -1,11 +1,12 @@
 from datetime import timedelta as td
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import F
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import  render, redirect
+from django.shortcuts import  render, redirect, get_object_or_404
 
 from hc.api import schemas
 from hc.api.decorators import check_api_key, uuid_or_400, validate_json
@@ -13,6 +14,7 @@ from hc.api.models import Check, Ping
 from hc.lib.badges import check_signature, get_badge_svg
 from hc.accounts.models import Member
 from .forms import TeamMemberForm
+import json
 
 from hc.api.management.commands.sendalerts import Command
 
@@ -174,3 +176,50 @@ def view_assigned_jobs(request):
              'member_id':member_id
          }
     return render(request, "accounts/assigned_jobs.html", ctx)
+
+
+@login_required
+@uuid_or_400
+def view_escalate_check(request, code):
+    assert request.method == "POST"
+
+    check = get_object_or_404(Check, code=code)
+    if check.user_id != request.team.user.id:
+        return HttpResponseForbidden()
+
+    team_members = Member.objects.filter(team=request.team)
+    members_status = list()
+    for member in team_members:
+        if check in member.assigned_jobs.all():
+            members_status.append(dict(member=member.to_dict(), assigned=True, check=code))
+        else:
+            members_status.append(dict(member=member.to_dict(), assigned=False, check=code))
+
+    return JsonResponse(dict(team=members_status), status=200)
+
+
+@login_required
+def escalate_check(request):
+    if request.method != 'POST':
+        return HttpResponseForbidden()
+
+    try:
+        check_status = request.POST.getlist('check_status', False)
+        check_code = check_status[0].split(' ')[1]
+    except TypeError:
+        check_code = request.POST.get('code')
+        check = get_object_or_404(Check, code=check_code)
+        check.member_set.clear()
+        check.save()
+        return redirect("hc-checks")
+
+    check = get_object_or_404(Check, code=check_code)
+    check.member_set.clear()
+    for each_status in check_status:
+        details = each_status.split(' ')
+        member_id = details[0]
+        team_member = Member.objects.get(id=member_id)
+        team_member.assigned_jobs.add(check)
+        team_member.save()
+
+    return redirect("hc-checks")

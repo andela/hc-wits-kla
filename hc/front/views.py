@@ -17,7 +17,7 @@ from hc.api.decorators import uuid_or_400
 from hc.accounts.models import REPORT_PERIOD_CHOICES
 from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping, Tutorial, Faq
 from hc.front.forms import (AddChannelForm, AddWebhookForm, NameTagsForm,
-                            TimeoutForm, NagIntervalForm)
+                            TimeoutForm, NagIntervalForm, PriorityForm)
 from hc.accounts.models import Member
 
 
@@ -55,6 +55,8 @@ def my_reports(request):
 def my_checks(request):
     q = Check.objects.filter(user=request.team.user).order_by("created")
     checks = list(q)
+    sorted_checks = []
+    initial_insertion_point = 0
 
     counter = Counter()
     down_tags, grace_tags = set(), set()
@@ -70,6 +72,15 @@ def my_checks(request):
                 down_tags.add(tag)
             elif check.in_grace_period():
                 grace_tags.add(tag)
+
+        if check.priority == 'High':
+            sorted_checks.insert(0, check)
+            initial_insertion_point += 1
+        elif check.priority == 'Low':
+            sorted_checks.append(check)
+        else:
+            sorted_checks.insert(initial_insertion_point, check)
+
     if request.user in [member.user for member in Member.objects.all()]:
         team_member = Member.objects.get(user=request.user)
 
@@ -77,7 +88,7 @@ def my_checks(request):
 
         ctx = {
             "page": "checks",
-            "checks": checks,
+            "checks": sorted_checks,
             "now": timezone.now(),
             "tags": counter.most_common(),
             "down_tags": down_tags,
@@ -88,7 +99,7 @@ def my_checks(request):
     else:
         ctx = {
             "page": "checks",
-            "checks": checks,
+            "checks": sorted_checks,
             "now": timezone.now(),
             "tags": counter.most_common(),
             "down_tags": down_tags,
@@ -221,7 +232,7 @@ def add_check(request):
     assert request.method == "POST"
 
     check = Check(user=request.team.user)
-    
+
     check.save()
 
 
@@ -244,6 +255,22 @@ def update_name(request, code):
         check.name = form.cleaned_data["name"]
         check.tags = form.cleaned_data["tags"]
         check.save()
+
+    return redirect("hc-checks")
+
+
+@login_required()
+@uuid_or_400
+def update_priority(request, code):
+    assert request.method == "POST"
+
+    check = get_object_or_404(Check, code=code)
+    if check.user_id != request.team.user.id:
+        return HttpResponseForbidden()
+
+    form = PriorityForm(request.POST)
+    if form.is_valid():
+        check.set_priority(form.cleaned_data["priority"])
 
     return redirect("hc-checks")
 

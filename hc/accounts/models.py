@@ -100,6 +100,15 @@ class Member(models.Model):
     team = models.ForeignKey(Profile)
     user = models.ForeignKey(User)
     assigned_jobs = models.ManyToManyField(Check)
+
+    def to_dict(self):
+        # pause_rel_url = reverse("hc-api-pause", args=[self.code])
+
+        result = {
+            "id": self.user.id,
+            "email": self.user.email
+        }
+        return result
     
     def __str__(self):
         return self.user.username

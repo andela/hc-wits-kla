@@ -196,6 +196,31 @@
     </div>
 </div>
 
+<div id="escalate-check-modal" class="modal">
+    <div class="modal-dialog">
+        <form id="escalate-check-form" method="post">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="remove-check-title">Escalate Check <span class="remove-check-name"></span></h4>
+                </div>
+                <div class="modal-body" >
+                    <table class="table table-striped" id="escalate-table">
+                        <thead id="escalate-table-header"></thead>
+                        <tbody id="escalate-table-body"></tbody>
+                    </table>
+                    <input type="hidden" name="code" id="escalate-check-code"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="escalate-button" data-url="{% url 'hc-escalate-check' %}">Escalate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="show-usage-modal" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -316,6 +341,11 @@
 
 <form id="pause-form" method="post">
     {% csrf_token %}
+</form>
+
+<form id="priority-form" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="priority" id="update-priority" />
 </form>
 
 {% endblock %}

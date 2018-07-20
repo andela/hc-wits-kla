@@ -1,2 +1,2 @@
 web: gunicorn hc.wsgi:application
-release: python manage.py migrate
+worker: bash ./deployment_tasks_script.sh

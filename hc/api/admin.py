@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.core.paginator import Paginator
 from django.db import connection
-from hc.api.models import Channel, Check, Notification, Ping, Faq, Tutorial
+from hc.api.models import (
+    Channel, Check, Notification, Ping, Faq, Tutorial, EmailTask, SocialMediaTask)
 
 
 class OwnershipListFilter(admin.SimpleListFilter):
@@ -216,7 +217,6 @@ class TutorialAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'header')
 
 
-
 @admin.register(Faq)
 class FaqAdmin(admin.ModelAdmin):
 
@@ -230,3 +230,20 @@ class FaqAdmin(admin.ModelAdmin):
 
     list_filter = ["question", "answer"]
     list_display_links = ('id', 'question')
+
+
+@admin.register(EmailTask)
+class EmailTaskAdmin(admin.ModelAdmin):
+    search_fields = ["subject"]
+    readonly_fields = ["run_date", "status"]
+    list_display = ("subject", "run_date", "status")
+    list_filter = ["subject", "run_date"]
+
+
+@admin.register(SocialMediaTask)
+class SocialMediaTaskAdmin(admin.ModelAdmin):
+
+    search_fields = ["post"]
+    readonly_fields = ["run_date", "status"]
+    list_display = ("post",)
+    list_filter = ["run_date"]

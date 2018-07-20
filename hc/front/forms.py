@@ -1,5 +1,5 @@
 from django import forms
-from hc.api.models import Channel
+from hc.api.models import Channel, DatabaseBackupTask
 
 
 class NameTagsForm(forms.Form):
@@ -53,3 +53,17 @@ class AddWebhookForm(forms.Form):
 
     def get_value(self):
         return "{value_down}\n{value_up}".format(**self.cleaned_data)
+
+
+class AddDatabaseBackupTaskForm(forms.ModelForm):
+    BACKUP_CHOICES = (
+        ('Daily', 'Daily'),
+        ('Weekly', 'Weekly'),
+        ('Monthly', 'Monthly')
+    )
+
+    class Meta:
+        model = DatabaseBackupTask
+        fields = ["username", "database_kind", "database_name", "ip_address"]
+    password = forms.CharField(max_length=100, required=False)
+    backups_period = forms.ChoiceField(required=True, choices=BACKUP_CHOICES)

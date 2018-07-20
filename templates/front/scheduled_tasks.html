@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load compress staticfiles %}
+{% load hc_extras humanize %}
+{% load blog_tags humanize %}
+{% block title %}My Scheduled Tasks - healthchecks.io{% endblock %}
+
+{% block content %}
+<div class="row">
+        {% if messages %}
+        <div class="col-sm-12">
+            {% for message in messages %}
+            <p class="alert alert-{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <h1>
+        {% if request.team == request.user.profile %}
+            Database  Backup Tasks
+        {% endif %}
+        </h1>
+    </div>
+    <div>
+        <a class="btn btn-default pull-right" data-toggle="modal" data-target="#backup-task-modal" href="#">New Database Backup Task</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table channels-table">
+            <tbody>
+                <tr>
+                    <th>Status</th>
+                    <th>Database Name</th>
+                    <th>Database Type</th>
+                    <th>Backup Period</th>
+                    <th>Last Backup File name</th>
+                    <th>Last run date</th>
+                    <th>Next run date</th>
+                    <th>Action</th>
+                </tr>
+                {% for task in db_tasks  %}
+                <tr class="channel-row">
+                    <td class="indicator-cell">
+                        {% if task.status == "new" %}
+                        <span class="status icon-up new"
+                                        data-toggle="tooltip" title="New. Has never received a ping."></span>
+                        {% elif task.status == "okay" %}
+                            <span class="status icon-up"></span>
+                        {% elif task.status == "errored" %}
+                            <span class="status icon-down"></span>
+                        {% endif %}
+                    </td>
+                    <td class="name-cell">{{task.database_name}}</td>
+                    <td>{{task.database_kind}}</td>
+                    <td>{{task.backups_period}}</td>
+                    <td>
+                        {% if task.file_name %}
+                            <a href="{% url "hc-db-backup" task.id %}">{{task.file_name}}</a>
+                        {% else %}
+                         <i>None</i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.last_run_date %}
+                            {{task.last_run_date}}
+                        {% else %}
+                           <i>Never</i>
+                        {% endif %}
+                    </td>
+                    <td>{{task.next_run_date}}</td>
+                     <td>
+                        <a class="btn btn-danger" id="btn-delete" onclick="confirmDelete({{ task.id }})">Delete</a>
+                     </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="backup-task-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">New database backup</h4>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_userbame">Database Kind</label>
+                        {{ dbtask_form.database_kind | addcss:"form-control" }}
+                        {{ dbtask_form.database_kind.errors }}
+                    </div>
+                    <div class="form-group">
+                            <label for="id_userbame">Database Name</label>
+                            {{ dbtask_form.database_name | addcss:"form-control" }}
+                            {{ dbtask_form.database_name.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_userbame">Database Username</label>
+                        {{ dbtask_form.username | addcss:"form-control" }}
+                        {{ dbtask_form.username.errors }}
+                    </div>
+                    <div class="form-group">
+                            <label for="id_userbame">Database host/ IP Address</label>
+                            {{ dbtask_form.ip_address | addcss:"form-control" }}
+                            {{ dbtask_form.ip_address.errors }}
+                    </div>
+                    <div class="form-group">
+                            <label for="id_userbame">Database Password</label>
+                            <input class="form-control" name="password" id="id_password" type="password">
+                            {{ dbtask_form.password.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_backups_period">How frequently:</label>
+                        {{ dbtask_form.backups_period | addcss:"form-control" }}
+                        {{ dbtask_form.backups_period.errors}}
+                    </div>
+                    <input class="btn btn-primary" type="submit" value="Save" type="text">
+                </form>
+            </div>
+          </div>
+        </div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" id="confirm-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="msg">Are you sure you want to remove this task.</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="modal-btn-yes">Yes</button>
+          <button type="button" class="btn btn-default" id="modal-btn-no">No</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% compress js %}
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script>
+    var delId = 0;
+    function confirmDelete(id){
+        delId = id;
+        $("#confirm-modal").modal('show');
+    }
+    $("#modal-btn-yes").on("click", function(){
+        //TODO: perform request to delete a post
+        $.ajax({
+            url:  `/db-task/${delId}/remove/`,
+            type: 'DELETE',
+            success: function(result) {
+                window.location.reload();
+            }
+        });
+        $("#confirm-modal").modal('hide');
+    });
+    $("#modal-btn-no").on("click", function(){
+        $("#confirm-modal").modal('hide');
+    });
+</script>
+{% endcompress %}
+{% endblock %}

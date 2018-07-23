@@ -346,14 +346,14 @@ class DatabaseBackupTask(models.Model):
         super(DatabaseBackupTask, self).save(*args, **kwargs)
 
     def save_to_dropbox(self):
-        self.create_backup_folder()
-        file_from = "{0}/{1}".format(settings.BACKUPS_FOLDER, self.file_name)
+        # self.create_backup_folder()
+        file_from = "{0}".format(self.file_name)
         file_to = "/Backups/{}".format(self.file_name)
 
         dbx = dropbox.Dropbox(settings.DROPBOX_ACCESS_TOKEN)
         f = open(file_from, "rb")
         dbx.files_upload(f.read(), file_to)
-        os.remove("{0}/{1}".format(settings.BACKUPS_FOLDER, self.file_name))
+        os.remove("{0}".format(self.file_name))
 
     def get_file_from_dropbox(self):
         try:
@@ -365,11 +365,11 @@ class DatabaseBackupTask(models.Model):
             return None
 
     def backup(self):
-        self.create_backup_folder()
+        # self.create_backup_folder()
         file_name = self.database_name + "-" + \
             timezone.now().strftime("%Y-%m-%d-%H-%M") + ".gz"
         try:
-            with gzip.open("{0}/{1}".format(settings.BACKUPS_FOLDER, file_name), 'wb') as f:
+            with gzip.open("{0}".format(file_name), 'wb') as f:
                 if self.database_kind == 'postgresql':
                     cmd = "postgresql://{0}:{1}@{2}:5432/{3}".format(
                         self.username, self.password, self.ip_address, self.database_name)

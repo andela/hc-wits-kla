@@ -1,7 +1,7 @@
 from collections import Counter
 from datetime import timedelta as td
 from itertools import tee
-
+from django.http import HttpResponse
 import requests
 from django.conf import settings
 from django.contrib import messages
@@ -12,12 +12,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.six.moves.urllib.parse import urlencode
 from hc.api.decorators import uuid_or_400
 from hc.accounts.models import REPORT_PERIOD_CHOICES
-from hc.api.models import DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel, Check, Ping, Tutorial, Faq
+from hc.api.models import (DEFAULT_GRACE, DEFAULT_TIMEOUT, Channel,
+                           Check, Ping, Tutorial, Faq, BACKUP_PERIOD_CHOICES, DatabaseBackupTask)
 from hc.front.forms import (AddChannelForm, AddWebhookForm, NameTagsForm,
-                            TimeoutForm, NagIntervalForm)
+                            TimeoutForm, NagIntervalForm, AddDatabaseBackupTaskForm)
 from hc.accounts.models import Member
 
 
@@ -131,6 +133,7 @@ def failed_checks(request):
 
     return render(request, "front/failed_checks.html", ctx)
 
+
 @login_required
 def hc_tutorials(request):
     q = Tutorial.objects.order_by("id")
@@ -142,6 +145,7 @@ def hc_tutorials(request):
     }
 
     return render(request, "front/tutorials.html", ctx)
+
 
 @login_required
 def faq(request):
@@ -221,9 +225,8 @@ def add_check(request):
     assert request.method == "POST"
 
     check = Check(user=request.team.user)
-    
-    check.save()
 
+    check.save()
 
     check.assign_all_channels()
 
@@ -668,3 +671,63 @@ def privacy(request):
 def terms(request):
     return render(request, "front/terms.html", {})
 
+
+@login_required
+def scheduled_tasks(request):
+    if request.method == "POST":
+        dbtask_form = AddDatabaseBackupTaskForm(request.POST)
+        if dbtask_form.is_valid():
+            task = DatabaseBackupTask(
+                owner=request.user,
+                username=dbtask_form.cleaned_data["username"],
+                ip_address=dbtask_form.cleaned_data["ip_address"],
+                database_kind=dbtask_form.cleaned_data["database_kind"],
+                backups_period=dbtask_form.cleaned_data["backups_period"],
+                database_name=dbtask_form.cleaned_data["database_name"]
+            )
+            task.password = dbtask_form.cleaned_data["password"]
+            task.save()
+            dbtask_form = AddDatabaseBackupTaskForm()
+            messages.success(
+                request, "Task has been added successfully.")
+        else:
+            messages.error(request, "Task could not be saved. Check errors")
+    else:
+        dbtask_form = AddDatabaseBackupTaskForm()
+    db_tasks = DatabaseBackupTask.objects.filter(owner=request.user).all()
+    ctx = {
+        "dbtask_form": dbtask_form,
+        "db_tasks": db_tasks
+    }
+    return render(request, "front/scheduled_tasks.html", ctx)
+
+
+@login_required
+def get_db_backup_file(request, task_id):
+    task = get_object_or_404(
+        DatabaseBackupTask, id=task_id, owner=request.user)
+    try:
+        res = task.get_file_from_dropbox()
+        response = HttpResponse(content_type="application/gzip")
+        response["Content-Disposition"] = "attachment; filename={}".format(
+            task.file_name)
+        response.write(res.content)
+        return response
+    except Exception:
+        messages.info(
+            request, "Backup file does not exist")
+        return redirect(reverse("hc-scheduled-tasks"))
+
+
+@csrf_exempt
+@login_required
+def remove_db_task(request, task_id):
+    if request.method == "DELETE":
+        task = get_object_or_404(
+            DatabaseBackupTask, owner=request.user, id=task_id)
+        task.delete()
+        messages.success(
+            request, "Task has been deleted successfully.")
+        return HttpResponse({"message": "task deleted successfully"}, 200)
+    else:
+        return HttpResponse({"message": "Http Method Not Allowed"}, 405)

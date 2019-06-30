@@ -13,3 +13,5 @@ static/.DS_Store
 hc-venv
 .env
 htmlcov
+celerybeat-schedule
+backups/

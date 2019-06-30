@@ -3,8 +3,12 @@
 import hashlib
 import json
 import uuid
+import gzip
+from sh import pg_dump
+import dropbox
+import tweepy
+import os
 from datetime import timedelta as td
-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -40,6 +44,12 @@ NAG_MODE = (
     ("off", "Off")
 )
 
+BACKUP_PERIOD_CHOICES = {
+    'Daily': 1,
+    'Weekly': 7,
+    'Monthly': 30
+}
+
 
 class Check(models.Model):
 
@@ -57,7 +67,7 @@ class Check(models.Model):
     nag = models.DurationField(default=DEFAULT_NAG_INTERVAL)
     last_nag = models.DateTimeField(null=True, blank=True)
     n_pings = models.IntegerField(default=0)
-    ping_before_last_ping = models.DateTimeField(null=True,blank=True)
+    ping_before_last_ping = models.DateTimeField(null=True, blank=True)
     last_ping = models.DateTimeField(null=True, blank=True)
     alert_after = models.DateTimeField(null=True, blank=True, editable=False)
     status = models.CharField(max_length=6, choices=STATUSES, default="new")
@@ -283,4 +293,134 @@ class Faq(models.Model):
 class Tutorial(models.Model):
     header = models.TextField(blank=True, null=False)
     description = models.TextField(blank=True, null=False)
-    video_link = models.URLField(blank=False, null=False, help_text="https://www.youtube.com/embed/8m1uQa8u4QM")
+    video_link = models.URLField(
+        blank=False, null=False, help_text="https://www.youtube.com/embed/8m1uQa8u4QM")
+
+
+class DatabaseBackupTask(models.Model):
+    DATABASE_CHOICES = (
+        ('postgresql', 'PostgresSQL'),
+    )
+    owner = models.ForeignKey(User)
+    ip_address = models.CharField(max_length=120)
+    file_name = models.CharField(max_length=100)
+    backups_period = models.CharField(max_length=10, default="Daily")
+    database_kind = models.CharField(max_length=20, choices=DATABASE_CHOICES)
+    database_name = models.CharField(max_length=200)
+    username = models.CharField(max_length=128)
+    password_hash = models.CharField(max_length=256)
+    error_message = models.CharField(max_length=100)
+    last_run_date = models.DateTimeField(blank=True, null=True)
+    next_run_date = models.DateTimeField()
+
+    @property
+    def password(self):
+        return self.password_hash
+
+    def get_key(self):
+        key = settings.SECRET_KEY
+        return hashlib.sha256(key.encode()).digest()
+
+    @property
+    def status(self):
+        now = timezone.now()
+        if self.last_run_date:
+            if self.next_run_date > self.last_run_date and self.next_run_date > now:
+                return "okay"
+            else:
+                return "errored"
+        return "new"
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = password
+
+    def create_backup_folder(self):
+        if not os.path.exists(settings.BACKUPS_FOLDER):
+            os.makedirs(settings.BACKUPS_FOLDER)
+
+    def save(self, *args, **kwargs):
+        # make the next run date be immediate
+        if not self.next_run_date:
+            self.next_run_date = timezone.now()
+        super(DatabaseBackupTask, self).save(*args, **kwargs)
+
+    def save_to_dropbox(self):
+        # self.create_backup_folder()
+        file_from = "{0}".format(self.file_name)
+        file_to = "/Backups/{}".format(self.file_name)
+
+        dbx = dropbox.Dropbox(settings.DROPBOX_ACCESS_TOKEN)
+        f = open(file_from, "rb")
+        dbx.files_upload(f.read(), file_to)
+        os.remove("{0}".format(self.file_name))
+
+    def get_file_from_dropbox(self):
+        try:
+            dbx = dropbox.Dropbox(settings.DROPBOX_ACCESS_TOKEN)
+            _, f = dbx.files_download(
+                path="/Backups/{}".format(self.file_name))
+            return f
+        except Exception:
+            return None
+
+    def backup(self):
+        # self.create_backup_folder()
+        file_name = self.database_name + "-" + \
+            timezone.now().strftime("%Y-%m-%d-%H-%M") + ".gz"
+        try:
+            with gzip.open("{0}".format(file_name), 'wb') as f:
+                if self.database_kind == 'postgresql':
+                    cmd = "postgresql://{0}:{1}@{2}:5432/{3}".format(
+                        self.username, self.password, self.ip_address, self.database_name)
+                    pg_dump(cmd, _out=f)
+            self.last_run_date = timezone.now()
+            self.next_run_date = timezone.now(
+            ) + td(days=BACKUP_PERIOD_CHOICES[self.backups_period])
+
+            self.file_name = file_name
+            self.save()
+            self.save_to_dropbox()
+        except Exception as e:
+            print(e.__str__())
+            self.error_message = "Error occured while backing up database"
+            self.save()
+
+
+class EmailTask(models.Model):
+    subject = models.CharField(max_length=100)
+    body = models.TextField()
+    run_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, default="okay")
+
+    def run(self):
+        ctx = {
+            "task": self
+        }
+        users = User.objects.all()
+        for user in users:
+            emails.send_task_email(user.email, ctx)
+        self.status = "sent"
+        self.run_date = timezone.now()
+        self.save()
+
+
+class SocialMediaTask(models.Model):
+    post = models.TextField()
+    run_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, default="okay")
+
+    def tweet(self):
+        auth = tweepy.OAuthHandler(
+            settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(settings.TWITTER_ACCESS_TOKEN,
+                              settings.TWITTER_ACCESS_TOKEN_SECRET)
+        api = tweepy.API(auth)
+        try:
+            api.update_status(self.post)
+            self.run_date = timezone.now()
+            self.status = "posted"
+            self.save()
+        except Exception:
+            self.status = "errored"
+            self.save()

@@ -26,3 +26,7 @@ def verify_email(to, ctx):
 
 def report(to, ctx):
     send("report", to, ctx)
+
+
+def send_task_email(to, ctx):
+    send("email-task", to, ctx)

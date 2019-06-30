@@ -39,6 +39,12 @@ urlpatterns = [
     url(r'^unresolved/', views.failed_checks, name="hc-unresolved"),
     url(r'^tutorials/', views.hc_tutorials, name="hc-tutorials"),
     url(r'^faqs/', views.faq, name="hc-faqs"),
+    url(r'^database-backup-tasks/',
+        views.scheduled_tasks, name="hc-scheduled-tasks"),
+    url(r'^db-task/(?P<task_id>\d+)/$',
+        views.get_db_backup_file, name="hc-db-backup"),
+    url(r'^db-task/(?P<task_id>\d+)/remove/$',
+        views.remove_db_task, name="hc-db-task-delete"),
 
     url(r'^docs/$', views.docs, name="hc-docs"),
     url(r'^docs/api/$', views.docs_api, name="hc-docs-api"),

@@ -163,6 +163,24 @@ PUSHOVER_EMERGENCY_EXPIRATION = 86400
 PUSHBULLET_CLIENT_ID = None
 PUSHBULLET_CLIENT_SECRET = None
 
+# celery configs
+BROKER_URL = os.environ.get("BROKER_URL")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Nairobi'
+
+# dropbox configs
+BACKUPS_FOLDER = "backups"
+DROPBOX_ACCESS_TOKEN = os.environ.get("DROPBOX_ACCESS_TOKEN")
+
+# twitter integrations
+TWITTER_CONSUMER_KEY = os.environ.get("TWITTER_CONSUMER_KEY")
+TWITTER_CONSUMER_SECRET = os.environ.get("TWITTER_CONSUMER_SECRET")
+TWITTER_ACCESS_TOKEN = os.environ.get("TWITTER_ACCESS_TOKEN")
+TWITTER_ACCESS_TOKEN_SECRET = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+
 if os.path.exists(os.path.join(BASE_DIR, "hc/local_settings.py")):
     from .local_settings import *
 else:
